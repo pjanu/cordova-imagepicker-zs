@@ -394,10 +394,10 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
     ********************/
     private class SquareImageView extends ImageView {
         public SquareImageView(Context context) {
-			super(context);
-		}
+            super(context);
+        }
 
-		@Override
+        @Override
         public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
             super.onMeasure(widthMeasureSpec, widthMeasureSpec);
         }
@@ -503,10 +503,10 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                     int width = options.outWidth;
                     int height = options.outHeight;
                     float scale = calculateScale(width, height);
+                    int finalWidth = (int)(width * scale);
+                    int finalHeight = (int)(height * scale);
 
                     if (scale < 1) {
-                        int finalWidth = (int)(width * scale);
-                        int finalHeight = (int)(height * scale);
                         int inSampleSize = calculateInSampleSize(options, finalWidth, finalHeight);
                         options = new BitmapFactory.Options();
                         options.inSampleSize = inSampleSize;
@@ -539,6 +539,9 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                             }
                         }
                     }
+                    file = this.storeImage(bmp, file.getName());
+                    bmp = null;
+                    System.gc();
 
                     // Create one more file - thumbnail here
                     File file2 = new File(imageInfo.getKey());
@@ -550,9 +553,9 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                     int height2 = options2.outHeight;
                     float scale2 = calculateScale(width2, height2);
                     if (scale2 < 1) {
-                        int finalWidth = 300;//(int)(width2 * scale2);
-                        int finalHeight = 300;//(int)(height2 * scale2);
-                        int inSampleSize = calculateInSampleSize(options2, finalWidth, finalHeight);
+                        int finalWidth2 = 300;//(int)(width2 * scale2);
+                        int finalHeight2 = 300;//(int)(height2 * scale2);
+                        int inSampleSize = calculateInSampleSize(options2, finalWidth2, finalHeight2);
                         options2 = new BitmapFactory.Options();
                         options2.inSampleSize = inSampleSize;
                         try {
@@ -584,6 +587,9 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                             }
                         }
                     }
+                    file2 = this.storeImage(bmp2, file2.getName());
+                    bmp2 = null;
+                    System.gc();
 
                     // Create one more file - thumbnail here
                     File file3 = new File(imageInfo.getKey());
@@ -595,9 +601,9 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                     int height3 = options3.outHeight;
                     float scale3 = calculateScale(width3, height3);
                     if (scale3 < 1) {
-                        int finalWidth = 30;//(int)(width3 * scale3);
-                        int finalHeight = 30;//(int)(height3 * scale3);
-                        int inSampleSize = calculateInSampleSize(options3, finalWidth, finalHeight);
+                        int finalWidth3 = 30;//(int)(width3 * scale3);
+                        int finalHeight3 = 30;//(int)(height3 * scale3);
+                        int inSampleSize = calculateInSampleSize(options3, finalWidth3, finalHeight3);
                         options3 = new BitmapFactory.Options();
                         options3.inSampleSize = inSampleSize;
                         try {
@@ -629,13 +635,12 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                             }
                         }
                     }
-
-                    file = this.storeImage(bmp, file.getName());
-                    file2 = this.storeImage(bmp2, file2.getName());
                     file3 = this.storeImage(bmp3, file3.getName());
+                    bmp3 = null;
+                    System.gc();
 
                     // Return both files together
-                    al.add(Uri.fromFile(file).toString()+";"+Uri.fromFile(file2).toString()+";"+Uri.fromFile(file3).toString());
+                    al.add(Uri.fromFile(file).toString()+"|"+width+"x"+height+"-"+finalWidth+"x"+finalHeight+";"+Uri.fromFile(file2).toString()+";"+Uri.fromFile(file3).toString());
                 }
                 return al;
             } catch(IOException e) {
