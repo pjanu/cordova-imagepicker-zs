@@ -23,5 +23,25 @@
     android:dividerPadding="12dp">
 
     <include layout="@layout/actionbar_discard_button" />
+
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        style="?android:actionBarStyle"
+        android:id="@+id/actionbar_status"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1">
+
+        <TextView style="?android:actionBarTabTextStyle"
+            android:id="@+id/actionbar_status_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:paddingRight="10dp"
+            android:paddingLeft="10dp"
+            android:drawablePadding="8dp"
+            android:gravity="center_vertical"
+            android:text="" />
+    </FrameLayout>
+
     <include layout="@layout/actionbar_done_button" />
 </LinearLayout>

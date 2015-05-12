@@ -77,6 +77,9 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+// For landscape orientation fix (imports ActivityInfo)
+import android.content.pm.ActivityInfo;
+
 public class MultiImageChooserActivity extends Activity implements OnItemClickListener,
         LoaderManager.LoaderCallbacks<Cursor> {
     private static final String TAG = "ImagePicker";
@@ -122,6 +125,8 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         fakeR = new FakeR(this);
+        // Fix orientation to landscape - call this before setContentView
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         setContentView(fakeR.getId("layout", "multiselectorgrid"));
         fileNames.clear();
 
@@ -172,6 +177,7 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
         getLoaderManager().initLoader(CURSORLOADER_REAL, null, this);
         setupHeader();
         updateAcceptButton();
+        updateHeaderText("Vybráno " + fileNames.size() + " z " + maxImageCount + "");
         progress = new ProgressDialog(this);
         progress.setTitle("Zpracovávám obrázky");
         progress.setMessage("Zpracování může chvilku trvat");
@@ -226,6 +232,7 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
 
         checkStatus.put(position, isChecked);
         updateAcceptButton();
+        updateHeaderText("Vybráno " + fileNames.size() + " z " + maxImageCount + "");
     }
 
     @Override
@@ -311,8 +318,13 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
      ********************/
     private void updateAcceptButton() {
         ((TextView) getActionBar().getCustomView().findViewById(fakeR.getId("id", "actionbar_done_textview")))
-                .setEnabled(fileNames.size() != 0);
+            .setEnabled(fileNames.size() != 0);
         getActionBar().getCustomView().findViewById(fakeR.getId("id", "actionbar_done")).setEnabled(fileNames.size() != 0);
+    }
+
+    private void updateHeaderText(String text) {
+        ((TextView) getActionBar().getCustomView().findViewById(fakeR.getId("id", "actionbar_status_textview")))
+            .setText(text);
     }
 
     private void setupHeader() {
