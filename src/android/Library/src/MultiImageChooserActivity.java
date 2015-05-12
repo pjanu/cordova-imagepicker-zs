@@ -179,7 +179,7 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
         updateAcceptButton();
         updateHeaderText("Vybráno " + fileNames.size() + " z " + maxImageCount + "");
         progress = new ProgressDialog(this);
-        progress.setTitle("Zpracovávám obrázky");
+        progress.setTitle("Zpracovávám fotografie");
         progress.setMessage("Zpracování může chvilku trvat");
     }
 
@@ -195,8 +195,8 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
         if (maxImages == 0 && isChecked) {
             isChecked = false;
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle("Maximum " + maxImageCount + " fotek");
-            builder.setMessage("Můžete vybrat maximálně " + maxImageCount + " fotek.");
+            builder.setTitle("Maximum " + maxImageCount + " fotografií");
+            builder.setMessage("Můžete vybrat maximálně " + maxImageCount + " fotografií.");
             builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
                     dialog.cancel();
