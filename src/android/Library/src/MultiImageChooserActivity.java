@@ -79,6 +79,8 @@ import android.widget.TextView;
 
 // For landscape orientation fix (imports ActivityInfo)
 import android.content.pm.ActivityInfo;
+// For exif orientation tag
+import android.media.ExifInterface;
 
 public class MultiImageChooserActivity extends Activity implements OnItemClickListener,
         LoaderManager.LoaderCallbacks<Cursor> {
@@ -179,7 +181,7 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
         updateAcceptButton();
         updateHeaderText("Vybráno " + fileNames.size() + " z " + maxImageCount + "");
         progress = new ProgressDialog(this);
-        progress.setTitle("Zpracovávám fotografie");
+        progress.setTitle("Zpracovávám obrázky");
         progress.setMessage("Zpracování může chvilku trvat");
     }
 
@@ -195,8 +197,8 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
         if (maxImages == 0 && isChecked) {
             isChecked = false;
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle("Maximum " + maxImageCount + " fotografií");
-            builder.setMessage("Můžete vybrat maximálně " + maxImageCount + " fotografií.");
+            builder.setTitle("Maximum " + maxImageCount + " fotek");
+            builder.setMessage("Můžete vybrat maximálně " + maxImageCount + " fotek.");
             builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
                     dialog.cancel();
@@ -512,8 +514,22 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                     options.inSampleSize = 1;
                     options.inJustDecodeBounds = true;
                     BitmapFactory.decodeFile(file.getAbsolutePath(), options);
+
+                    // Get exif orientation
+                    ExifInterface exif = new ExifInterface(file.getAbsolutePath());
+                    int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
+
                     int width = options.outWidth;
                     int height = options.outHeight;
+
+                    // Swith width and height if rotated 90 or 270 deg
+                    if(orientation == ExifInterface.ORIENTATION_ROTATE_90 || orientation == ExifInterface.ORIENTATION_ROTATE_270)
+                    {
+                        height = options.outWidth;
+                        width = options.outHeight;
+                        orientation = 111;
+                    }
+
                     float scale = calculateScale(width, height);
                     int finalWidth = (int)(width * scale);
                     int finalHeight = (int)(height * scale);
@@ -652,7 +668,7 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                     System.gc();
 
                     // Return both files together
-                    al.add(Uri.fromFile(file).toString()+"|"+width+"x"+height+"-"+finalWidth+"x"+finalHeight+";"+Uri.fromFile(file2).toString()+";"+Uri.fromFile(file3).toString());
+                    al.add(Uri.fromFile(file).toString()+"|"+width+"x"+height+"-"+finalWidth+"x"+finalHeight+"-"+orientation+";"+Uri.fromFile(file2).toString()+";"+Uri.fromFile(file3).toString());
                 }
                 return al;
             } catch(IOException e) {
