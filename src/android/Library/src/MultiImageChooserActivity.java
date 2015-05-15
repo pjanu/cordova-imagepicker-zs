@@ -181,7 +181,7 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
         updateAcceptButton();
         updateHeaderText("Vybráno " + fileNames.size() + " z " + maxImageCount + "");
         progress = new ProgressDialog(this);
-        progress.setTitle("Zpracovávám obrázky");
+        progress.setTitle("Zpracovávám fotografie");
         progress.setMessage("Zpracování může chvilku trvat");
     }
 
