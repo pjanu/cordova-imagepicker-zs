@@ -5,5 +5,5 @@
     <string name="error_database">There was an error opening the images database. Please report the problem.</string>
     <string name="requesting_thumbnails">Generuji náhledy, prosím čekejte</string>
     <string name="discard">Zrušit</string>
-    <string name="done">OK</string>
+    <string name="done">Hotovo</string>
 </resources>
