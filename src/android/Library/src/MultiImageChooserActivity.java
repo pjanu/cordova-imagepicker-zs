@@ -123,6 +123,8 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
 
     private ProgressDialog progress;
 
+    private boolean lockPicker = false;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -181,12 +183,17 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
         updateAcceptButton();
         updateHeaderText("Vybráno " + fileNames.size() + " z " + maxImageCount + "");
         progress = new ProgressDialog(this);
-        progress.setTitle("Zpracovávám fotografie");
+        progress.setTitle("Zpracovávám obrázky");
         progress.setMessage("Zpracování může chvilku trvat");
+        progress.setCanceledOnTouchOutside(false);
+        progress.setCancelable(false);
     }
 
     @Override
     public void onItemClick(AdapterView<?> arg0, View view, int position, long id) {
+        if (lockPicker == true) {
+            return;
+        }
         String name = getImageName(position);
         int rotation = getImageRotation(position);
 
@@ -301,6 +308,7 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
     }
 
     public void selectClicked(View ignored) {
+        lockPicker = true;
         ((TextView) getActionBar().getCustomView().findViewById(fakeR.getId("id", "actionbar_done_textview"))).setEnabled(false);
         getActionBar().getCustomView().findViewById(fakeR.getId("id", "actionbar_done")).setEnabled(false);
         progress.show();
