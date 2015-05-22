@@ -82,6 +82,7 @@ import android.content.pm.ActivityInfo;
 // For exif orientation tag
 import android.media.ExifInterface;
 
+
 public class MultiImageChooserActivity extends Activity implements OnItemClickListener,
         LoaderManager.LoaderCallbacks<Cursor> {
     private static final String TAG = "ImagePicker";
@@ -91,6 +92,8 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
     public static final String WIDTH_KEY = "WIDTH";
     public static final String HEIGHT_KEY = "HEIGHT";
     public static final String QUALITY_KEY = "QUALITY";
+    public static final String SELECTED_KEY = "SELECTED_KEY";
+    public static final String ADD_IMAGES = "ADD_IMAGES";
 
     private ImageAdapter ia;
 
@@ -102,11 +105,13 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
     private static final int CURSORLOADER_REAL = 1;
 
     private Map<String, Integer> fileNames = new HashMap<String, Integer>();
+    private Map<String, Integer> fileNamesRemoved = new HashMap<String, Integer>();
 
     private SparseBooleanArray checkStatus = new SparseBooleanArray();
 
     private int maxImages;
     private int maxImageCount;
+    private int addImagesCount;
 
     private int desiredWidth;
     private int desiredHeight;
@@ -116,7 +121,7 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
 
     private final ImageFetcher fetcher = new ImageFetcher();
 
-    private int selectedColor = 0xff32b2e1;
+    private int selectedColor = 0xffc70f3f;
     private boolean shouldRequestThumb = true;
 
     private FakeR fakeR;
@@ -124,20 +129,25 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
     private ProgressDialog progress;
 
     private boolean lockPicker = false;
+    private String alreadySelectedFileNames = "";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        // Log.d("ZETBOOK", "onCreate");
         super.onCreate(savedInstanceState);
         fakeR = new FakeR(this);
         // Fix orientation to landscape - call this before setContentView
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         setContentView(fakeR.getId("layout", "multiselectorgrid"));
         fileNames.clear();
+        fileNamesRemoved.clear();
 
         maxImages = getIntent().getIntExtra(MAX_IMAGES_KEY, NOLIMIT);
         desiredWidth = getIntent().getIntExtra(WIDTH_KEY, 0);
         desiredHeight = getIntent().getIntExtra(HEIGHT_KEY, 0);
         quality = getIntent().getIntExtra(QUALITY_KEY, 0);
+        alreadySelectedFileNames = getIntent().getStringExtra(SELECTED_KEY);
+        addImagesCount = getIntent().getIntExtra(ADD_IMAGES, 0);
         maxImageCount = maxImages;
 
         Display display = getWindowManager().getDefaultDisplay();
@@ -180,8 +190,20 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
         getLoaderManager().initLoader(CURSORLOADER_THUMBS, null, this);
         getLoaderManager().initLoader(CURSORLOADER_REAL, null, this);
         setupHeader();
+
+        // Some preselected files
+        if(alreadySelectedFileNames.length() > 0) {
+            String[] list = alreadySelectedFileNames.split(";");
+            for(String item : list)
+            {
+                // Push and ignore rotation - rotation is checked separately before resize
+                fileNames.put(item, 0);
+            }
+        }
+
         updateAcceptButton();
-        updateHeaderText("Vybráno " + fileNames.size() + " z " + maxImageCount + "");
+        int count = addImagesCount + fileNames.size();
+        updateHeaderText("Vybráno " + count + " z " + maxImageCount + "");
         progress = new ProgressDialog(this);
         progress.setTitle("Zpracovávám fotografie");
         progress.setMessage("Zpracování může chvilku trvat");
@@ -191,6 +213,8 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
 
     @Override
     public void onItemClick(AdapterView<?> arg0, View view, int position, long id) {
+        // Log.d("ZETBOOK", "onItemClick");
+
         if (lockPicker == true) {
             return;
         }
@@ -200,7 +224,15 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
         if (name == null) {
             return;
         }
+
+        // boolean selected = isSelected(name);
+        // if(selected)
+        // {
+        //     return;
+        // }
+
         boolean isChecked = !isChecked(position);
+
         if (maxImages == 0 && isChecked) {
             isChecked = false;
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -215,20 +247,22 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
             alert.show();
         } else if (isChecked) {
             fileNames.put(name, new Integer(rotation));
+            fileNamesRemoved.remove(name);
             if (maxImageCount == 1) {
                 this.selectClicked(null);
             } else {
                 maxImages--;
                 ImageView imageView = (ImageView)view;
                 if (android.os.Build.VERSION.SDK_INT>=16) {
-                  imageView.setImageAlpha(128);
+                  imageView.setImageAlpha(160);
                 } else {
-                  imageView.setAlpha(128);
+                  imageView.setAlpha(160);
                 }
                 view.setBackgroundColor(selectedColor);
             }
         } else {
             fileNames.remove(name);
+            fileNamesRemoved.put(name, 0);
             maxImages++;
             ImageView imageView = (ImageView)view;
             if (android.os.Build.VERSION.SDK_INT>=16) {
@@ -241,11 +275,13 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
 
         checkStatus.put(position, isChecked);
         updateAcceptButton();
-        updateHeaderText("Vybráno " + fileNames.size() + " z " + maxImageCount + "");
+        int count = addImagesCount + fileNames.size();
+        updateHeaderText("Vybráno " + count + " z " + maxImageCount + "");
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int cursorID, Bundle arg1) {
+        // Log.d("ZETBOOK", "onCreateLoader");
         CursorLoader cl = null;
 
         ArrayList<String> img = new ArrayList<String>();
@@ -265,11 +301,13 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
 
         cl = new CursorLoader(MultiImageChooserActivity.this, MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                 img.toArray(new String[img.size()]), null, null, "DATE_MODIFIED DESC");
+
         return cl;
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        // Log.d("ZETBOOK", "onLoadFinished");
         if (cursor == null) {
             // NULL cursor. This usually means there's no image database yet....
             return;
@@ -291,10 +329,13 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
             default:
                 break;
         }
+
+        gridView.invalidateViews();
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
+        // Log.d("ZETBOOK", "onLoaderReset");
         if (loader.getId() == CURSORLOADER_THUMBS) {
             imagecursor = null;
         } else if (loader.getId() == CURSORLOADER_REAL) {
@@ -314,7 +355,11 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
         progress.show();
         Intent data = new Intent();
         if (fileNames.isEmpty()) {
-            this.setResult(RESULT_CANCELED);
+            Bundle res = new Bundle();
+            res.putString("REMOVEDFILENAMES", fileNamesRemoved.toString());
+            res.putString("TYPE", "CLEAR");
+            data.putExtras(res);
+            this.setResult(RESULT_OK, data);
             progress.dismiss();
             finish();
         } else {
@@ -327,9 +372,15 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
      * Helper Methods
      ********************/
     private void updateAcceptButton() {
+        boolean enabled = fileNames.size() != 0;
+        // Enable also when some removed and new selection is empty
+        if(fileNamesRemoved.size() != 0)
+        {
+            enabled = true;
+        }
         ((TextView) getActionBar().getCustomView().findViewById(fakeR.getId("id", "actionbar_done_textview")))
-            .setEnabled(fileNames.size() != 0);
-        getActionBar().getCustomView().findViewById(fakeR.getId("id", "actionbar_done")).setEnabled(fileNames.size() != 0);
+            .setEnabled(enabled);
+        getActionBar().getCustomView().findViewById(fakeR.getId("id", "actionbar_done")).setEnabled(enabled);
     }
 
     private void updateHeaderText(String text) {
@@ -410,6 +461,24 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
         return ret;
     }
 
+    public boolean isSelected(String fileName) {
+        if(alreadySelectedFileNames.length() == 0)
+        {
+            return false;
+        }
+        boolean ret = alreadySelectedFileNames.contains(fileName);
+        return ret;
+    }
+
+    public int getSelectedCount() {
+        if(alreadySelectedFileNames.length() == 0)
+        {
+            return 0;
+        }
+        int ret = alreadySelectedFileNames.length() - alreadySelectedFileNames.replace(";", "").length() + 1;
+        return ret;
+    }
+
 
     /*********************
     * Nested Classes
@@ -476,13 +545,28 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                 return imageView;
             }
 
+            //  Needed for proper getImageName (otherwise randomly fails)
+            boolean selected = false;
+            String name = null;
+            if (actualimagecursor != null ) {
+                name = getImageName(pos);
+                selected = isSelected(name);
+            }
+
             final int id = imagecursor.getInt(image_column_index);
             final int rotate = imagecursor.getInt(image_column_orientation);
+
+            // Consider selected file as checked
+            if(selected)
+            {
+                checkStatus.put(pos, true);
+            }
+
             if (isChecked(pos)) {
                 if (android.os.Build.VERSION.SDK_INT>=16) {
-                  imageView.setImageAlpha(128);
+                  imageView.setImageAlpha(160);
                 } else {
-                  imageView.setAlpha(128);
+                  imageView.setAlpha(160);
                 }
                 imageView.setBackgroundColor(selectedColor);
             } else {
@@ -493,6 +577,7 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                 }
                 imageView.setBackgroundColor(Color.TRANSPARENT);
             }
+
             if (shouldRequestThumb) {
                 fetcher.fetch(Integer.valueOf(id), imageView, colWidth, rotate);
             }
@@ -517,7 +602,8 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                 while(i.hasNext()) {
                     Entry<String, Integer> imageInfo = i.next();
                     File file = new File(imageInfo.getKey());
-                    int rotate = imageInfo.getValue().intValue();
+                    String originalFilename = file.getAbsolutePath();
+                    // int rotate = imageInfo.getValue().intValue();
                     BitmapFactory.Options options = new BitmapFactory.Options();
                     options.inSampleSize = 1;
                     options.inJustDecodeBounds = true;
@@ -535,8 +621,24 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                     {
                         height = options.outWidth;
                         width = options.outHeight;
-                        orientation = 111;
                     }
+
+                    // Recosntruct rotation
+                    int rotate = 0;
+                    if(orientation == ExifInterface.ORIENTATION_ROTATE_90)
+                    {
+                        rotate = 90;
+                    }
+                    if(orientation == ExifInterface.ORIENTATION_ROTATE_180)
+                    {
+                        rotate = 180;
+                    }
+                    if(orientation == ExifInterface.ORIENTATION_ROTATE_270)
+                    {
+                        rotate = 270;
+                    }
+
+                    // Log.d("ZETBOOK", orientation + "-" + rotate);
 
                     float scale = calculateScale(width, height);
                     int finalWidth = (int)(width * scale);
@@ -675,8 +777,8 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                     bmp3 = null;
                     System.gc();
 
-                    // Return both files together
-                    al.add(Uri.fromFile(file).toString()+"|"+width+"x"+height+"-"+finalWidth+"x"+finalHeight+"-"+orientation+";"+Uri.fromFile(file2).toString()+";"+Uri.fromFile(file3).toString());
+                    // Return all files together
+                    al.add(Uri.fromFile(file).toString()+"|"+width+"x"+height+"-"+finalWidth+"x"+finalHeight+"-"+orientation+";"+Uri.fromFile(file2).toString()+";"+Uri.fromFile(file3).toString()+";"+originalFilename);
                 }
                 return al;
             } catch(IOException e) {
@@ -702,6 +804,7 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
             if (asyncTaskError != null) {
                 Bundle res = new Bundle();
                 res.putString("ERRORMESSAGE", asyncTaskError.getMessage());
+                res.putString("REMOVEDFILENAMES", fileNamesRemoved.toString());
                 data.putExtras(res);
                 setResult(RESULT_CANCELED, data);
             } else if (al.size() > 0) {
@@ -710,9 +813,13 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                 if (imagecursor != null) {
                     res.putInt("TOTALFILES", imagecursor.getCount());
                 }
+                res.putString("REMOVEDFILENAMES", fileNamesRemoved.toString());
                 data.putExtras(res);
                 setResult(RESULT_OK, data);
             } else {
+                Bundle res = new Bundle();
+                res.putString("REMOVEDFILENAMES", fileNamesRemoved.toString());
+                data.putExtras(res);
                 setResult(RESULT_CANCELED, data);
             }
 

@@ -28,11 +28,16 @@ public class ImagePicker extends CordovaPlugin {
 		if (action.equals("getPictures")) {
 			Intent intent = new Intent(cordova.getActivity(), MultiImageChooserActivity.class);
 			int max = 20;
+			int add = 0;
 			int desiredWidth = 0;
 			int desiredHeight = 0;
 			int quality = 100;
+			String selectedFileNames = "";
 			if (this.params.has("maximumImagesCount")) {
 				max = this.params.getInt("maximumImagesCount");
+			}
+			if (this.params.has("addImagesCount")) {
+				add = this.params.getInt("addImagesCount");
 			}
 			if (this.params.has("width")) {
 				desiredWidth = this.params.getInt("width");
@@ -43,10 +48,15 @@ public class ImagePicker extends CordovaPlugin {
 			if (this.params.has("quality")) {
 				quality = this.params.getInt("quality");
 			}
+			if (this.params.has("selected")) {
+				selectedFileNames = this.params.getString("selected");
+			}
 			intent.putExtra("MAX_IMAGES", max);
+			intent.putExtra("ADD_IMAGES", add);
 			intent.putExtra("WIDTH", desiredWidth);
 			intent.putExtra("HEIGHT", desiredHeight);
 			intent.putExtra("QUALITY", quality);
+			intent.putExtra("SELECTED_KEY", selectedFileNames);
 			if (this.cordova != null) {
 				this.cordova.startActivityForResult((CordovaPlugin) this, intent, 0);
 			}
@@ -56,16 +66,41 @@ public class ImagePicker extends CordovaPlugin {
 
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (resultCode == Activity.RESULT_OK && data != null) {
-			ArrayList<String> fileNames = data.getStringArrayListExtra("MULTIPLEFILENAMES");
-			JSONArray res = new JSONArray(fileNames);
-			this.callbackContext.success(res);
-		} else if (resultCode == Activity.RESULT_CANCELED && data != null) {
+			String type = data.getStringExtra("TYPE");
+			JSONArray res = null;
+			if(type != "CLEAR")
+			{
+				ArrayList<String> fileNames = data.getStringArrayListExtra("MULTIPLEFILENAMES");
+				res = new JSONArray(fileNames);
+			}
+			else {
+				res = new JSONArray();
+			}
+			String fileNamesRemoved = data.getStringExtra("REMOVEDFILENAMES");
+			JSONObject gres = new JSONObject();
+			try {
+				gres.put("state", "ok");
+				gres.put("removedFiles", fileNamesRemoved);
+				gres.put("addedFiles", res);
+			} catch (JSONException e) {
+			    e.printStackTrace();
+			}
+			this.callbackContext.success(gres);
+		}
+		else if (resultCode == Activity.RESULT_CANCELED && data != null) {
 			String error = data.getStringExtra("ERRORMESSAGE");
 			this.callbackContext.error(error);
-		} else if (resultCode == Activity.RESULT_CANCELED) {
-			JSONArray res = new JSONArray();
-			this.callbackContext.success(res);
-		} else {
+		}
+		else if (resultCode == Activity.RESULT_CANCELED) {
+			JSONObject gres = new JSONObject();
+			try {
+				gres.put("state", "cancelled");
+			} catch (JSONException e) {
+			    e.printStackTrace();
+			}
+			this.callbackContext.success(gres);
+		}
+		else {
 			this.callbackContext.error("No images selected");
 		}
 	}
