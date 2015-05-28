@@ -198,6 +198,7 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
             {
                 // Push and ignore rotation - rotation is checked separately before resize
                 fileNames.put(item, 0);
+                maxImages--;
             }
         }
 
