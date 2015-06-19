@@ -82,6 +82,9 @@ import android.content.pm.ActivityInfo;
 // For exif orientation tag
 import android.media.ExifInterface;
 
+// import android.Locale;
+import java.util.Locale; 
+
 
 public class MultiImageChooserActivity extends Activity implements OnItemClickListener,
         LoaderManager.LoaderCallbacks<Cursor> {
@@ -131,8 +134,34 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
     private boolean lockPicker = false;
     private String alreadySelectedFileNames = "";
 
+
+    private String selectedLang = "en";
+
+    private String strChosen = "Picked";
+    private String strOf = "of";
+    private String strProcessing = "Processing photos";
+    private String strProcessingNote = "Processing may take a while";
+    private String strChooseMax = "Max";
+    private String strChooseMaxPhotos = "photos";
+    private String strChooseNoteMax = "You can choose max";
+    private String strChooseNoteMaxPhotos = "photos";
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
+
+        selectedLang = Locale.getDefault().getLanguage();
+        if(selectedLang.equals("cs"))
+        {
+            strChosen = "Vybráno";
+            strOf = "z";
+            strProcessing = "Zpracovávám fotografie";
+            strProcessingNote = "Zpracování může chvilku trvat";
+            strChooseMax = "Maximum";
+            strChooseMaxPhotos = "fotek";
+            strChooseNoteMax = "Můžete vybrat maximálně";
+            strChooseNoteMaxPhotos = "fotek";
+        }
+
         // Log.d("ZETBOOK", "onCreate");
         super.onCreate(savedInstanceState);
         fakeR = new FakeR(this);
@@ -205,10 +234,10 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
         updateAcceptButton();
         int count = addImagesCount + fileNames.size();
         int maxCount = addImagesCount + maxImageCount;
-        updateHeaderText("Vybráno " + count + " z " + maxCount + "");
+        updateHeaderText(strChosen + " " + count + " " + strOf + " " + maxCount + "");
         progress = new ProgressDialog(this);
-        progress.setTitle("Zpracovávám fotografie");
-        progress.setMessage("Zpracování může chvilku trvat");
+        progress.setTitle(strProcessing);
+        progress.setMessage(strProcessingNote);
         progress.setCanceledOnTouchOutside(false);
         progress.setCancelable(false);
     }
@@ -239,8 +268,8 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
             isChecked = false;
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             int maxCount = addImagesCount + maxImageCount;
-            builder.setTitle("Maximum " + maxCount + " fotek");
-            builder.setMessage("Můžete vybrat maximálně " + maxCount + " fotek.");
+            builder.setTitle(strChooseMax + " " + maxCount + " " + strChooseMaxPhotos);
+            builder.setMessage(strChooseNoteMax + " " + maxCount + " " + strChooseNoteMaxPhotos + ".");
             builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
                     dialog.cancel();
@@ -280,7 +309,7 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
         updateAcceptButton();
         int count = addImagesCount + fileNames.size();
         int maxCount = addImagesCount + maxImageCount;
-        updateHeaderText("Vybráno " + count + " z " + maxCount + "");
+        updateHeaderText(strChosen + " " + count + " " + strOf + " " + maxCount + "");
     }
 
     @Override
