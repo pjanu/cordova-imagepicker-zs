@@ -97,6 +97,7 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
     public static final String QUALITY_KEY = "QUALITY";
     public static final String SELECTED_KEY = "SELECTED_KEY";
     public static final String ADD_IMAGES = "ADD_IMAGES";
+    public static final String SELECTED_COLOR_KEY = "SELECTED_COLOR";
 
     private ImageAdapter ia;
 
@@ -161,6 +162,17 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
             strChooseNoteMax = "Můžete vybrat maximálně";
             strChooseNoteMaxPhotos = "fotek";
         }
+        else if(selectedLang.equals("sk"))
+        {
+            strChosen = "Vybrané";
+            strOf = "z";
+            strProcessing = "Spracovávam fotografie";
+            strProcessingNote = "Spracovanie môže chvíľku trvať";
+            strChooseMax = "Maximum";
+            strChooseMaxPhotos = "fotiek";
+            strChooseNoteMax = "Môžete vybrať maximálne";
+            strChooseNoteMaxPhotos = "fotiek";
+        }
 
         // Log.d("ZETBOOK", "onCreate");
         super.onCreate(savedInstanceState);
@@ -171,6 +183,7 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
         fileNames.clear();
         fileNamesRemoved.clear();
 
+        selectedColor = getIntent().getIntExtra(SELECTED_COLOR_KEY, 0xffc70f3f);
         maxImages = getIntent().getIntExtra(MAX_IMAGES_KEY, NOLIMIT);
         desiredWidth = getIntent().getIntExtra(WIDTH_KEY, 0);
         desiredHeight = getIntent().getIntExtra(HEIGHT_KEY, 0);
