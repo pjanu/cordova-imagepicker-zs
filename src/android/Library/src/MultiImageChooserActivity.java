@@ -81,6 +81,7 @@ import android.widget.TextView;
 import android.content.pm.ActivityInfo;
 // For exif orientation tag
 import android.media.ExifInterface;
+import android.os.SystemClock; 
 
 // import android.Locale;
 import java.util.Locale; 
@@ -638,6 +639,9 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
 
         @Override
         protected ArrayList<String> doInBackground(Set<Entry<String, Integer>>... fileSets) {
+
+            Log.v("ZBOOK", "doInBackground 2");
+
             Set<Entry<String, Integer>> fileNames = fileSets[0];
             ArrayList<String> al = new ArrayList<String>();
             try {
@@ -654,6 +658,8 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                     options.inSampleSize = 1;
                     options.inJustDecodeBounds = true;
                     BitmapFactory.decodeFile(file.getAbsolutePath(), options);
+
+                    Log.v("ZBOOK", "resizing " + file);
 
                     // Get exif orientation
                     ExifInterface exif = new ExifInterface(file.getAbsolutePath());
@@ -690,19 +696,36 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                     int finalWidth = (int)(width * scale);
                     int finalHeight = (int)(height * scale);
 
+                    Log.v("ZBOOK", "resize 1 " + file);
+
+                    System.gc();
+                    SystemClock.sleep(100);
+                    System.gc();
+
+                    String fname = null;
+                    String fname2;
+                    String fname3;
+                    
+
                     if (scale < 1) {
                         int inSampleSize = calculateInSampleSize(options, finalWidth, finalHeight);
                         options = new BitmapFactory.Options();
                         options.inSampleSize = inSampleSize;
                         try {
                             bmp = this.tryToGetBitmap(file, options, rotate, true);
+
+                            file = this.storeImage(bmp, file.getName());
+                            fname = Uri.fromFile(file).toString();
+                            bmp.recycle();
+
+                            System.gc();
+                            bmp = null;
+                            System.gc();
+                            SystemClock.sleep(100);
+
                         } catch (OutOfMemoryError e) {
-                            options.inSampleSize = calculateNextSampleSize(options.inSampleSize);
-                            try {
-                                bmp = this.tryToGetBitmap(file, options, rotate, false);
-                            } catch (OutOfMemoryError e2) {
-                                throw new IOException("Unable to load image into memory.");
-                            }
+                            fname = Uri.fromFile(file).toString();
+                            Log.v("ZBOOK", "unable to resize, using original file " + file);
                         }
                     } else {
                         try {
@@ -713,19 +736,25 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                             try {
                                 bmp = this.tryToGetBitmap(file, options, rotate, false);
                             } catch(OutOfMemoryError e2) {
+
+                                System.gc();
+                                bmp = null;
+                                System.gc();
+                                SystemClock.sleep(100);
+
                                 options = new BitmapFactory.Options();
                                 options.inSampleSize = 4;
                                 try {
                                     bmp = this.tryToGetBitmap(file, options, rotate, false);
                                 } catch (OutOfMemoryError e3) {
-                                    throw new IOException("Unable to load image into memory.");
+                                    throw new IOException("Unable to load image A1 ("+(al.size()+1)+" - "+file+") into memory.");
                                 }
                             }
                         }
                     }
-                    file = this.storeImage(bmp, file.getName());
-                    bmp = null;
-                    System.gc();
+            
+
+                    // Log.v("ZBOOK", "resize 2 " + file);
 
                     // Create one more file - thumbnail here
                     File file2 = new File(imageInfo.getKey());
@@ -745,11 +774,17 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                         try {
                             bmp2 = this.tryToGetBitmap(file2, options2, rotate, true);
                         } catch (OutOfMemoryError e) {
+
+                            System.gc();
+                            bmp2 = null;
+                            System.gc();
+                            SystemClock.sleep(100);
+
                             options2.inSampleSize = calculateNextSampleSize(options2.inSampleSize);
                             try {
                                 bmp2 = this.tryToGetBitmap(file2, options2, rotate, false);
                             } catch (OutOfMemoryError e2) {
-                                throw new IOException("Unable to load image into memory.");
+                                throw new IOException("Unable to load image B0 ("+(al.size()+1)+" - "+file+") into memory.");
                             }
                         }
                     } else {
@@ -761,70 +796,87 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                             try {
                                 bmp2 = this.tryToGetBitmap(file2, options2, rotate, false);
                             } catch(OutOfMemoryError e2) {
+
+                                System.gc();
+                                bmp2 = null;
+                                System.gc();
+                                SystemClock.sleep(100);
+
                                 options2 = new BitmapFactory.Options();
                                 options2.inSampleSize = 4;
                                 try {
                                     bmp2 = this.tryToGetBitmap(file2, options2, rotate, false);
                                 } catch (OutOfMemoryError e3) {
-                                    throw new IOException("Unable to load image into memory.");
+                                    throw new IOException("Unable to load image B1 ("+(al.size()+1)+" - "+file+") into memory.");
                                 }
                             }
                         }
                     }
                     file2 = this.storeImage(bmp2, file2.getName());
+                    fname2 = Uri.fromFile(file2).toString();
+
+                    bmp2.recycle();
+                    System.gc();
                     bmp2 = null;
                     System.gc();
+                    SystemClock.sleep(100);
 
-                    // Create one more file - thumbnail here
-                    File file3 = new File(imageInfo.getKey());
-                    BitmapFactory.Options options3 = new BitmapFactory.Options();
-                    options3.inSampleSize = 1;
-                    options3.inJustDecodeBounds = true;
-                    BitmapFactory.decodeFile(file3.getAbsolutePath(), options3);
-                    int width3 = options3.outWidth;
-                    int height3 = options3.outHeight;
-                    float scale3 = calculateScale(width3, height3);
-                    if (scale3 < 1) {
-                        int finalWidth3 = 30;//(int)(width3 * scale3);
-                        int finalHeight3 = 30;//(int)(height3 * scale3);
-                        int inSampleSize = calculateInSampleSize(options3, finalWidth3, finalHeight3);
-                        options3 = new BitmapFactory.Options();
-                        options3.inSampleSize = inSampleSize;
-                        try {
-                            bmp3 = this.tryToGetBitmap(file3, options3, rotate, true);
-                        } catch (OutOfMemoryError e) {
-                            options3.inSampleSize = calculateNextSampleSize(options3.inSampleSize);
-                            try {
-                                bmp3 = this.tryToGetBitmap(file3, options3, rotate, false);
-                            } catch (OutOfMemoryError e2) {
-                                throw new IOException("Unable to load image into memory.");
-                            }
-                        }
-                    } else {
-                        try {
-                            bmp3 = this.tryToGetBitmap(file3, null, rotate, false);
-                        } catch(OutOfMemoryError e) {
-                            options3 = new BitmapFactory.Options();
-                            options3.inSampleSize = 3;
-                            try {
-                                bmp3 = this.tryToGetBitmap(file3, options3, rotate, false);
-                            } catch(OutOfMemoryError e2) {
-                                options3 = new BitmapFactory.Options();
-                                options3.inSampleSize = 4;
-                                try {
-                                    bmp3 = this.tryToGetBitmap(file3, options3, rotate, false);
-                                } catch (OutOfMemoryError e3) {
-                                    throw new IOException("Unable to load image into memory.");
-                                }
-                            }
-                        }
-                    }
-                    file3 = this.storeImage(bmp3, file3.getName());
-                    bmp3 = null;
-                    System.gc();
+
+                    // // Log.v("ZBOOK", "resize 3 " + file);
+
+                    // // Create one more file - thumbnail here
+                    // File file3 = new File(imageInfo.getKey());
+                    // BitmapFactory.Options options3 = new BitmapFactory.Options();
+                    // options3.inSampleSize = 1;
+                    // options3.inJustDecodeBounds = true;
+                    // BitmapFactory.decodeFile(file3.getAbsolutePath(), options3);
+                    // int width3 = options3.outWidth;
+                    // int height3 = options3.outHeight;
+                    // float scale3 = calculateScale(width3, height3);
+                    // if (scale3 < 1) {
+                    //     int finalWidth3 = 30;//(int)(width3 * scale3);
+                    //     int finalHeight3 = 30;//(int)(height3 * scale3);
+                    //     int inSampleSize = calculateInSampleSize(options3, finalWidth3, finalHeight3);
+                    //     options3 = new BitmapFactory.Options();
+                    //     options3.inSampleSize = inSampleSize;
+                    //     try {
+                    //         bmp3 = this.tryToGetBitmap(file3, options3, rotate, true);
+                    //     } catch (OutOfMemoryError e) {
+                    //         options3.inSampleSize = calculateNextSampleSize(options3.inSampleSize);
+                    //         try {
+                    //             bmp3 = this.tryToGetBitmap(file3, options3, rotate, false);
+                    //         } catch (OutOfMemoryError e2) {
+                    //             throw new IOException("Unable to load image C0 ("+(al.size()+1)+" - "+file+") into memory.");
+                    //         }
+                    //     }
+                    // } else {
+                    //     try {
+                    //         bmp3 = this.tryToGetBitmap(file3, null, rotate, false);
+                    //     } catch(OutOfMemoryError e) {
+                    //         options3 = new BitmapFactory.Options();
+                    //         options3.inSampleSize = 3;
+                    //         try {
+                    //             bmp3 = this.tryToGetBitmap(file3, options3, rotate, false);
+                    //         } catch(OutOfMemoryError e2) {
+                    //             options3 = new BitmapFactory.Options();
+                    //             options3.inSampleSize = 4;
+                    //             try {
+                    //                 bmp3 = this.tryToGetBitmap(file3, options3, rotate, false);
+                    //             } catch (OutOfMemoryError e3) {
+                    //                 throw new IOException("Unable to load image C1 ("+(al.size()+1)+" - "+file+") into memory.");
+                    //             }
+                    //         }
+                    //     }
+                    // }
+                    // file3 = this.storeImage(bmp2, file3.getName());
+                    // fname3 = Uri.fromFile(file3).toString();
+                    // bmp3.recycle();
+
+                    Log.v("ZBOOK", "resize end " + file);
 
                     // Return all files together
-                    al.add(Uri.fromFile(file).toString()+"|"+width+"x"+height+"-"+finalWidth+"x"+finalHeight+"-"+orientation+";"+Uri.fromFile(file2).toString()+";"+Uri.fromFile(file3).toString()+";"+originalFilename);
+                    al.add(fname+"|"+width+"x"+height+"-"+finalWidth+"x"+finalHeight+"-"+orientation+";"+fname2+";"+fname2+";"+originalFilename);
+                    // al.add(Uri.fromFile(file).toString()+"|"+width+"x"+height+"-"+finalWidth+"x"+finalHeight+"-"+orientation+";aa;bbb;"+originalFilename);
                 }
                 return al;
             } catch(IOException e) {
@@ -874,20 +926,33 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
         }
 
         private Bitmap tryToGetBitmap(File file, BitmapFactory.Options options, int rotate, boolean shouldScale) throws IOException, OutOfMemoryError {
+
+            Log.v("ZBOOK", "tryToGetBitmap " + file);
+
             Bitmap bmp;
             if (options == null) {
+                Log.v("ZBOOK", "decodeFile pre null 2" + file);
+                Log.v("ZBOOK", "decodeFile pre file.getAbsolutePath()" + file.getAbsolutePath());
                 bmp = BitmapFactory.decodeFile(file.getAbsolutePath());
+                Log.v("ZBOOK", "decodeFile post null" + file);
             } else {
+                Log.v("ZBOOK", "decodeFile pre options" + file);
+                Log.v("ZBOOK", "decodeFile pre file.getAbsolutePath()" + file.getAbsolutePath());
                 bmp = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
+                Log.v("ZBOOK", "decodeFile post options" + file);
             }
             if (bmp == null) {
                 throw new IOException("The image file could not be opened.");
             }
+
+
             if (options != null && shouldScale) {
+                Log.v("ZBOOK", "shouldScale " + file);
                 float scale = calculateScale(options.outWidth, options.outHeight);
                 bmp = this.getResizedBitmap(bmp, scale);
             }
             if (rotate != 0) {
+                Log.v("ZBOOK", "rotate " + file);
                 Matrix matrix = new Matrix();
                 matrix.setRotate(rotate);
                 bmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
@@ -905,6 +970,9 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
         * Copyright (C) 2012, webXells GmbH All Rights Reserved.
         */
         private File storeImage(Bitmap bmp, String fileName) throws IOException {
+
+            Log.v("ZBOOK", "storeImage " + fileName);
+
             int index = fileName.lastIndexOf('.');
             String name = fileName.substring(0, index);
             String ext = fileName.substring(index);
@@ -925,10 +993,19 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
             int height = bm.getHeight();
             // create a matrix for the manipulation
             Matrix matrix = new Matrix();
+
+            Log.v("ZBOOK", "matrix");
+
             // resize the bit map
             matrix.postScale(factor, factor);
+
+            Log.v("ZBOOK", "postScale");
+
             // recreate the new Bitmap
             Bitmap resizedBitmap = Bitmap.createBitmap(bm, 0, 0, width, height, matrix, false);
+
+            Log.v("ZBOOK", "createBitmap");
+
             return resizedBitmap;
         }
     }
