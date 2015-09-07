@@ -958,20 +958,30 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
         */
         private File storeImage(Bitmap bmp, String fileName) throws IOException {
 
-            Log.d("ZBOOK", "storeImage " + fileName);
+            Log.d("ZBOOK", "storeImage init " + fileName);
 
             int index = fileName.lastIndexOf('.');
-            String name = fileName.substring(0, index);
+            // Add file name prefix here since Android crashes when filename is number
+            String name = "tmp-" + fileName.substring(0, index);
             String ext = fileName.substring(index);
             File file = File.createTempFile(name, ext);
             OutputStream outStream = new FileOutputStream(file);
+
             if (ext.compareToIgnoreCase(".png") == 0) {
+                // Log.d("ZBOOK", "storeImage png" + fileName);
                 bmp.compress(Bitmap.CompressFormat.PNG, quality, outStream);
-            } else {
+            } 
+            else if(ext.compareToIgnoreCase(".jpg") == 0 || ext.compareToIgnoreCase(".jpeg") == 0) {
+                // Log.d("ZBOOK", "storeImage jpg" + fileName);
                 bmp.compress(Bitmap.CompressFormat.JPEG, quality, outStream);
             }
+            else {
+                throw new IOException("Unsupported extension: " + ext);
+            }
+
             outStream.flush();
             outStream.close();
+
             return file;
         }
 
