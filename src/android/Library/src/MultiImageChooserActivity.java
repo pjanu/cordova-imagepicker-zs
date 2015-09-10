@@ -783,7 +783,6 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                         tmpFile = storeImage(originalFile);
 
                         // reset bmp
-                        bmp.recycle();
                         bmp = null;
                     }
 
@@ -839,7 +838,6 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                         tmpFile = storeImage(originalFile);
 
                         // reset bmp
-                        bmp.recycle();
                         bmp = null;
                     }
 
@@ -894,7 +892,6 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                         tmpFile = storeImage(originalFile);
 
                         // reset bmp
-                        bmp.recycle();
                         bmp = null;
                     }
 
