@@ -2,9 +2,9 @@
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
   xmlns:android="http://schemas.android.com/apk/res/android"
   id="com.synconset.imagepicker-zetbook"
-  version="1.0.25">
+  version="1.0.26">
 
-	<name>ImagePicker Zetbook CS</name>
+	<name>ImagePicker Zetbook</name>
 
 	<description>
 		This plugin allows selection of multiple images from the camera roll / gallery in a phonegap app

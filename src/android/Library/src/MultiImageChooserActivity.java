@@ -30,12 +30,24 @@
 
 package com.synconset;
 
+//import javax.json.JsonObject;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.view.WindowManager;
+
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.lang.Exception;
+import java.lang.IllegalArgumentException;
+import java.lang.OutOfMemoryError;
 import java.net.URI;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -640,45 +652,55 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
         @Override
         protected ArrayList<String> doInBackground(Set<Entry<String, Integer>>... fileSets) {
 
-            Log.d("ZBOOK", "doInBackground 2");
+            Log.d("ZETBOOK", "\n\n\n" + "doInBackground" + "\n");
+
+            Log.d("ZETBOOK_MAIN", "PREVENT PHONE FROM SLEEPING");
+            // getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
             Set<Entry<String, Integer>> fileNames = fileSets[0];
             ArrayList<String> al = new ArrayList<String>();
             ArrayList<String> alCleanup = new ArrayList<String>();
             try {
                 Iterator<Entry<String, Integer>> i = fileNames.iterator();
-                Bitmap bmp;
-                Bitmap bmp2;
-                Bitmap bmp3;
+                int imagesCount = fileNames.size();
+                int imageSequence = 0;
+
+
                 while(i.hasNext()) {
+
                     System.gc();
+                    Bitmap bmp = null;
+
+                    imageSequence++;
 
                     Entry<String, Integer> imageInfo = i.next();
-                    File file = new File(imageInfo.getKey());
-                    String originalFilename = file.getAbsolutePath();
-                    // int rotate = imageInfo.getValue().intValue();
+                    File originalFile = new File(imageInfo.getKey());
+                    String originalFileName = originalFile.getName(),
+                           originalFilePath = originalFile.getAbsolutePath();
+                    File tmpFile;
+
+
                     BitmapFactory.Options options = new BitmapFactory.Options();
                     options.inSampleSize = 1;
                     options.inJustDecodeBounds = true;
-                    BitmapFactory.decodeFile(file.getAbsolutePath(), options);
-
-                    Log.d("ZBOOK", "resizing " + file);
+                    BitmapFactory.decodeFile(originalFilePath, options);
 
                     // Get exif orientation
-                    ExifInterface exif = new ExifInterface(file.getAbsolutePath());
+                    ExifInterface exif = new ExifInterface(originalFilePath);
                     int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
 
-                    int width = options.outWidth;
-                    int height = options.outHeight;
+                    int originalPhotoWidth = options.outWidth;
+                    int originalPhotoHeight = options.outHeight;
 
                     // Swith width and height if rotated 90 or 270 deg
-                    if(orientation == ExifInterface.ORIENTATION_ROTATE_90 || orientation == ExifInterface.ORIENTATION_ROTATE_270)
+                    if(originalPhotoHeight > originalPhotoWidth && (orientation == ExifInterface.ORIENTATION_ROTATE_90 || orientation == ExifInterface.ORIENTATION_ROTATE_270))
                     {
-                        height = options.outWidth;
-                        width = options.outHeight;
+                        originalPhotoHeight = options.outWidth;
+                        originalPhotoWidth = options.outHeight;
                     }
 
                     // Recosntruct rotation
+                    boolean rotationSuccess = false;
                     int rotate = 0;
                     if(orientation == ExifInterface.ORIENTATION_ROTATE_90)
                     {
@@ -693,180 +715,249 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                         rotate = 270;
                     }
 
-                    float scale = calculateScale(width, height);
-                    int finalWidth = (int)(width * scale);
-                    int finalHeight = (int)(height * scale);
+                    float scale = calculateScale(originalPhotoWidth, originalPhotoHeight);
+                    int finalWidth = (int)(originalPhotoWidth * scale);
+                    int finalHeight = (int)(originalPhotoHeight * scale);
 
-                    Log.d("ZETBOOK", "orientation: " + rotate + " of" + file);
+                    String largePhotoName = null;
+                    String thumbnailName = null;
+                    String miniPhotoName = null;
 
-                    String fname = null;
-                    String fname2;
-                    String fname3;
 
-                    if (scale < 1) {
-                        Log.d("ZBOOK", "resize 1 (small scale) " + file);
-                        int inSampleSize = calculateInSampleSize(options, finalWidth, finalHeight);
-                        options = new BitmapFactory.Options();
-                        options.inSampleSize = inSampleSize;
-                        try {
-                            bmp = this.tryToGetBitmap(file, options, rotate, true);
-                            file = this.storeImage(bmp, file.getName());
-                            alCleanup.add(Uri.fromFile(file).toString());
-                            bmp.recycle();
-                            bmp = null;
-                            System.gc();
-                        } catch (OutOfMemoryError e) {
-                            Log.e("ZBOOK", "unable to resize, using original file " + file);
-                        }
-                    } else {
-                        Log.d("ZBOOK", "resize 1 (large scale) " + file);
-                        try {
-                            bmp = this.tryToGetBitmap(file, null, rotate, false);
-                            file = this.storeImage(bmp, file.getName());
-                            alCleanup.add(Uri.fromFile(file).toString());
-                            bmp.recycle();
-                            bmp = null;
-                            System.gc();
-                        } catch(OutOfMemoryError e) {
-                            options = new BitmapFactory.Options();
-                            options.inSampleSize = 2;
+                    Log.d("ZETBOOK", "parsing file " + imageSequence + " of " + imagesCount + " (" + originalFile + ")");
+
+                    /**************************
+                     * large photo
+                     ************************/
+                    Log.d("ZETBOOK", "- large photo (original: " + originalPhotoWidth + "x" + originalPhotoHeight + ", final: " + finalWidth + "x" + finalHeight + ")");
+                    Log.d("ZETBOOK_MAIN", "photo " + imageSequence + " of " + imagesCount + " (original: " + options.outWidth + "x" + options.outHeight +  " rotate: " + rotate + "° modified:" + originalPhotoWidth + "x" + originalPhotoHeight + ", final: " + finalWidth + "x" + finalHeight + ")");
+
+
+                    int inSampleSize = 1;
+                    int maxSampleSize = calculateInSampleSize(originalPhotoWidth, originalPhotoHeight, finalWidth, finalHeight);
+
+                    options = new BitmapFactory.Options();
+                    options.inSampleSize = inSampleSize; // 1
+
+                    try {
+                        // create bitmap from file with bes sampling
+                        while((inSampleSize <= maxSampleSize) && bmp == null) {
+
                             try {
-                                bmp = this.tryToGetBitmap(file, options, rotate, false);
-                                file = this.storeImage(bmp, file.getName());
-                                alCleanup.add(Uri.fromFile(file).toString());
-                            } catch(OutOfMemoryError e2) {
+                                bmp = tryToGetBitmap(originalFile, options);
+                            }
+                            catch (OutOfMemoryError e) {
+                                // subsample
+                                inSampleSize *= 2;
+
                                 options = new BitmapFactory.Options();
-                                options.inSampleSize = 4;
-                                try {
-                                    bmp = this.tryToGetBitmap(file, options, rotate, false);
-                                } catch (OutOfMemoryError e3) {
-                                    throw new IOException("Unable to load image A1 ("+(al.size()+1)+" - "+file+") into memory.");
-                                }
-                            }
-                        }
-                    }
-                    fname = Uri.fromFile(file).toString();
+                                options.inSampleSize = inSampleSize;
 
-                    // Create one more file - thumbnail here
-                    File file2 = new File(imageInfo.getKey());
-                    BitmapFactory.Options options2 = new BitmapFactory.Options();
-                    options2.inSampleSize = 1;
-                    options2.inJustDecodeBounds = true;
-                    BitmapFactory.decodeFile(file2.getAbsolutePath(), options2);
-                    int width2 = options2.outWidth;
-                    int height2 = options2.outHeight;
-                    float scale2 = calculateScale(width2, height2);
-                    if (scale2 < 1) {
-                        Log.d("ZBOOK", "resize 2 (small scale) " + file);
-                        int finalWidth2 = 300;//(int)(width2 * scale2);
-                        int finalHeight2 = 300;//(int)(height2 * scale2);
-                        int inSampleSize = calculateInSampleSize(options2, finalWidth2, finalHeight2);
-                        options2 = new BitmapFactory.Options();
-                        options2.inSampleSize = inSampleSize;
-                        try {
-                            bmp2 = this.tryToGetBitmap(file2, options2, rotate, true);
-                        } catch (OutOfMemoryError e) {
-                            options2.inSampleSize = calculateNextSampleSize(options2.inSampleSize);
-                            try {
-                                bmp2 = this.tryToGetBitmap(file2, options2, rotate, false);
-                            } catch (OutOfMemoryError e2) {
-                                throw new IOException("Unable to load image B0 ("+(al.size()+1)+" - "+file+") into memory.");
-                            }
-                        }
-                    } else {
-                        Log.d("ZBOOK", "resize 2 (large scale) " + file);
-                        try {
-                            bmp2 = this.tryToGetBitmap(file2, null, rotate, false);
-                        } catch(OutOfMemoryError e) {
-                            options2 = new BitmapFactory.Options();
-                            options2.inSampleSize = 2;
-                            try {
-                                bmp2 = this.tryToGetBitmap(file2, options2, rotate, false);
-                            } catch(OutOfMemoryError e2) {
-
+                                bmp = null;
                                 System.gc();
-                                bmp2 = null;
-                                System.gc();
-                                SystemClock.sleep(100);
-
-                                options2 = new BitmapFactory.Options();
-                                options2.inSampleSize = 4;
-                                try {
-                                    bmp2 = this.tryToGetBitmap(file2, options2, rotate, false);
-                                } catch (OutOfMemoryError e3) {
-                                    throw new IOException("Unable to load image B1 ("+(al.size()+1)+" - "+file+") into memory.");
-                                }
                             }
                         }
+
+                        if(bmp == null) {
+                            Log.d("ZETBOOK", "** cannot create bitmap with any allowable sample size (max = " + maxSampleSize + ")");
+                            throw new OutOfMemoryError("** cannot create bitmap anyway (out of memmory)");
+                        }
+
+                        // scale if needed
+                        bmp = tryToScaleBitmapToPhoto(bmp);
+
+                        // rotate if needed
+                        bmp = tryToRotateBitmap(bmp, rotate);
+                        rotationSuccess = true;
+
+                        // store file
+                        tmpFile = storeImage(bmp, originalFileName);
+
+                        // ??
+                        alCleanup.add(Uri.fromFile(tmpFile).toString());
                     }
-                    file2 = this.storeImage(bmp2, file2.getName());
-                    fname2 = Uri.fromFile(file2).toString();
-                    alCleanup.add(fname2);
-                    bmp2.recycle();
-                    bmp2 = null;
-                    System.gc();
+                    catch (OutOfMemoryError e) {
+                        Log.d("ZETBOOK", "** out of memory (trying processing bitmap)");
 
+                        // store as original file
+                        tmpFile = storeImage(originalFile);
 
-                    // Create one more file - thumbnail here
-                    File file3 = new File(imageInfo.getKey());
-                    BitmapFactory.Options options3 = new BitmapFactory.Options();
-                    options3.inSampleSize = 1;
-                    options3.inJustDecodeBounds = true;
-                    BitmapFactory.decodeFile(file3.getAbsolutePath(), options3);
-                    int width3 = options3.outWidth;
-                    int height3 = options3.outHeight;
-                    float scale3 = calculateScale(width3, height3);
-                    if (scale3 < 1) {
-                        Log.d("ZBOOK", "resize 3 (small scale) " + file);
-                        int finalWidth3 = 30;//(int)(width3 * scale3);
-                        int finalHeight3 = 30;//(int)(height3 * scale3);
-                        int inSampleSize = calculateInSampleSize(options3, finalWidth3, finalHeight3);
-                        options3 = new BitmapFactory.Options();
-                        options3.inSampleSize = inSampleSize;
-                        try {
-                            bmp3 = this.tryToGetBitmap(file3, options3, rotate, true);
-                        } catch (OutOfMemoryError e) {
-                            options3.inSampleSize = calculateNextSampleSize(options3.inSampleSize);
-                            try {
-                                bmp3 = this.tryToGetBitmap(file3, options3, rotate, false);
-                            } catch (OutOfMemoryError e2) {
-                                throw new IOException("Unable to load image C0 ("+(al.size()+1)+" - "+file+") into memory.");
-                            }
-                        }
-                    } else {
-                        Log.d("ZBOOK", "resize 3 (large scale) " + file);
-                        try {
-                            bmp3 = this.tryToGetBitmap(file3, null, rotate, false);
-                        } catch(OutOfMemoryError e) {
-                            options3 = new BitmapFactory.Options();
-                            options3.inSampleSize = 3;
-                            try {
-                                bmp3 = this.tryToGetBitmap(file3, options3, rotate, false);
-                            } catch(OutOfMemoryError e2) {
-                                options3 = new BitmapFactory.Options();
-                                options3.inSampleSize = 4;
-                                try {
-                                    bmp3 = this.tryToGetBitmap(file3, options3, rotate, false);
-                                } catch (OutOfMemoryError e3) {
-                                    throw new IOException("Unable to load image C1 ("+(al.size()+1)+" - "+file+") into memory.");
-                                }
-                            }
-                        }
+                        // reset bmp
+                        bmp.recycle();
+                        bmp = null;
                     }
-                    file3 = this.storeImage(bmp3, file3.getName());
-                    fname3 = Uri.fromFile(file3).toString();
-                    alCleanup.add(fname3);
-                    bmp3.recycle();
-                    bmp3 = null;
-                    System.gc();
 
-                    Log.d("ZBOOK", "resize end " + file);
+                    largePhotoName = Uri.fromFile(tmpFile).toString();
 
-                    // Return all files together
-                    al.add(fname+"|"+width+"x"+height+"-"+finalWidth+"x"+finalHeight+"-"+orientation+";"+fname2+";"+fname3+";"+originalFilename);
+
+
+                    /**************************
+                     * thumbnail 300x300
+                     ************************/
+                    Log.d("ZETBOOK", "- thumbnail photo (300x300)");
+
+                    //bmp.recycle();
+                    //bmp = null;
+                    boolean newBitmap = (bmp == null);
+
+                    try {
+                        // create bitmap from file
+                        if(newBitmap) {
+                            options = new BitmapFactory.Options();
+                            options.inSampleSize = calculateInSampleSize(originalPhotoWidth, originalPhotoHeight, 300, 300);
+
+                            // get bitmap
+                            bmp = tryToGetBitmap(originalFile, options);
+
+                            // scale to 300x300
+                            bmp = tryToScaleBitmapToThumbnail(bmp);
+
+                            // rotate if needed
+                            bmp = tryToRotateBitmap(bmp, rotate);
+
+                        }
+                        else { // bitmap already exists
+
+                            Log.d("ZETBOOK", "** bitmap already exists");
+
+                            // only scale to 300x300
+                            bmp = tryToScaleBitmapToThumbnail(bmp);
+                        }
+
+
+
+                        // store file
+                        tmpFile = storeImage(bmp, originalFileName);
+
+                        // ??
+                        alCleanup.add(Uri.fromFile(tmpFile).toString());
+                    }
+                    catch (OutOfMemoryError e) {
+                        Log.d("ZETBOOK", "** out of memory");
+
+                        // store as original file
+                        tmpFile = storeImage(originalFile);
+
+                        // reset bmp
+                        bmp.recycle();
+                        bmp = null;
+                    }
+
+                    thumbnailName = Uri.fromFile(tmpFile).toString();
+
+
+
+
+                    /**************************
+                     * thumbnail 30x30
+                     ************************/
+                    Log.d("ZETBOOK", "- mini photo (30x30)");
+
+                    //bmp.recycle();
+                    //bmp = null;
+                    newBitmap = (bmp == null);
+
+                    try {
+                        // create bitmap from file
+                        if(newBitmap) {
+                            options = new BitmapFactory.Options();
+                            options.inSampleSize = calculateInSampleSize(originalPhotoWidth, originalPhotoHeight, 30, 30);
+
+                            // get bitmap
+                            bmp = tryToGetBitmap(originalFile, options);
+
+                            // scale to 300x300
+                            bmp = tryToScaleBitmapToMini(bmp);
+
+                            // rotate if needed
+                            bmp = tryToRotateBitmap(bmp, rotate);
+
+                        }
+                        else { // bitmap already exists
+
+                            Log.d("ZETBOOK", "** bitmap already exists");
+
+                            // only scale to 30x30
+                            bmp = tryToScaleBitmapToMini(bmp);
+                        }
+
+                        // store file
+                        tmpFile = storeImage(bmp, originalFileName);
+
+                        // ??
+                        alCleanup.add(Uri.fromFile(tmpFile).toString());
+                    }
+                    catch (OutOfMemoryError e) {
+                        Log.d("ZETBOOK", "** out of memory");
+
+                        // store as original file
+                        tmpFile = storeImage(originalFile);
+
+                        // reset bmp
+                        bmp.recycle();
+                        bmp = null;
+                    }
+
+                    miniPhotoName = Uri.fromFile(tmpFile).toString();
+
+
+                    // rotation success
+                    if(rotationSuccess) {
+                        orientation = ExifInterface.ORIENTATION_NORMAL;
+                    }
+                    // rotation failed
+                    else {
+                        /*
+                        if(orientation == ExifInterface.ORIENTATION_ROTATE_90 || orientation == ExifInterface.ORIENTATION_ROTATE_270) {
+
+                            int tmpSize = originalPhotoWidth;
+                            originalPhotoWidth = originalPhotoHeight;
+                            originalPhotoHeight = tmpSize;
+
+                            tmpSize = finalWidth;
+                            finalWidth = finalHeight;
+                            finalHeight = tmpSize;
+                        }
+                        */
+                    }
+
+
+                    // returning json object serialized
+                    JSONObject jsonObj = new JSONObject();
+                    try {
+                        jsonObj.put("originalFilePath", originalFilePath);
+                        jsonObj.put("largePhotoName", largePhotoName);
+                        jsonObj.put("thumbnailName", thumbnailName);
+                        jsonObj.put("miniPhotoName", miniPhotoName);
+                        jsonObj.put("originalPhotoWidth", originalPhotoWidth);
+                        jsonObj.put("originalPhotoHeight", originalPhotoHeight);
+                        jsonObj.put("finalWidth", finalWidth);
+                        jsonObj.put("finalHeight", finalHeight);
+                        jsonObj.put("finalOrientation", orientation);
+
+                        Log.d("ZJSON", jsonObj.toString());
+                    }
+                    catch (JSONException e) {
+                        Log.d("ZETBOOK", "** json serializing problem: " + e + " (file " + originalFileName + ")");
+                    }
+
+                    al.add(jsonObj.toString());
+
+
+                    // old return string
+                    //al.add(largePhotoName + "|" + originalPhotoWidth + "x" + originalPhotoHeight + "-" + finalWidth + "x" + finalHeight + "-" + orientation + ";" + thumbnailName + ";" + miniPhotoName + ";" + originalFilePath);
+
+                    // free memory
+                    bmp.recycle();
+                    bmp = null;
                 }
+
+
+
                 return al;
-            } catch(IOException e) {
+
+            }
+            catch(IOException e) {
                 try {
                     asyncTaskError = e;
                     for (int i = 0; i < alCleanup.size(); i++) {
@@ -912,40 +1003,94 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
             finish();
         }
 
-        private Bitmap tryToGetBitmap(File file, BitmapFactory.Options options, int rotate, boolean shouldScale) throws IOException, OutOfMemoryError {
 
-            Log.d("ZBOOK", "tryToGetBitmap " + file);
+        private Bitmap tryToGetBitmap(File file, BitmapFactory.Options options) throws IOException, OutOfMemoryError {
 
-            Bitmap bmp;
-            if (options == null) {
-                Log.d("ZBOOK", "decodeFile pre null 2" + file);
-                Log.d("ZBOOK", "decodeFile pre file.getAbsolutePath()" + file.getAbsolutePath());
-                bmp = BitmapFactory.decodeFile(file.getAbsolutePath());
-                Log.d("ZBOOK", "decodeFile post null" + file);
-            } else {
-                Log.d("ZBOOK", "decodeFile pre options" + file);
-                Log.d("ZBOOK", "decodeFile pre file.getAbsolutePath()" + file.getAbsolutePath());
-                bmp = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
-                Log.d("ZBOOK", "decodeFile post options" + file);
-            }
+            Log.d("ZETBOOK", "** trying to create bitmap (sample = " + options.inSampleSize + ")");
+
+            Bitmap bmp = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
+
             if (bmp == null) {
                 throw new IOException("The image file could not be opened.");
             }
 
-
-            if (options != null && shouldScale) {
-                Log.d("ZBOOK", "shouldScale " + file);
-                float scale = calculateScale(options.outWidth, options.outHeight);
-                bmp = this.getResizedBitmap(bmp, scale);
-            }
-            if (rotate != 0) {
-                Log.d("ZBOOK", "rotate " + file);
-                Matrix matrix = new Matrix();
-                matrix.setRotate(rotate);
-                bmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
-            }
+            Log.d("ZETBOOK", "** bitmap created (sample = " + options.inSampleSize + ")");
             return bmp;
         }
+
+        private Bitmap tryToRotateBitmap(Bitmap bmp, int rotate) {
+
+            if(rotate != 0 && rotate != 90 && rotate != 180 && rotate != 270) {
+                throw new IllegalArgumentException("rotate must be one of 0, 90, 180, 270 (not " + rotate + ")");
+            }
+
+            if (rotate != 0) {
+                Log.d("ZETBOOK", "** rotating by " + rotate + " degrees");
+                Matrix matrix = new Matrix();
+                matrix.setRotate(rotate);
+                return Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
+            }
+
+            return bmp;
+        }
+
+
+        private Bitmap tryToScaleBitmapToPhoto(Bitmap bmp) {
+
+
+
+
+            int width = bmp.getWidth(),
+                height = bmp.getHeight(),
+                maxSize;
+            float scale = calculateScale(width, height);
+
+            if(width > height) {
+                maxSize = width;
+            }
+            else {
+                maxSize = height;
+            }
+
+            return tryToScaleBitmap(bmp, (int)(maxSize * scale));
+        }
+
+        private Bitmap tryToScaleBitmapToThumbnail(Bitmap bmp) {
+            return tryToScaleBitmap(bmp, 300);
+        }
+
+        private Bitmap tryToScaleBitmapToMini(Bitmap bmp) {
+            return tryToScaleBitmap(bmp, 30);
+        }
+
+        private Bitmap tryToScaleBitmap(Bitmap bmp, int maxSize) {
+
+            float scale;
+            int width = bmp.getWidth(),
+                height = bmp.getHeight(),
+                newWidth,
+                newHeight;
+
+            if(width > height) {
+                scale = (float)width / height;
+                newWidth = (int)(maxSize * scale);
+                newHeight = maxSize;
+            }
+            else {
+                scale = (float)height / width;
+                newWidth = maxSize;
+                newHeight = (int)(maxSize * scale);
+            }
+            return tryToScaleBitmap(bmp, newWidth, newHeight);
+        }
+
+        private Bitmap tryToScaleBitmap(Bitmap bmp, int newWidth, int newHeight) {
+
+            Log.d("ZETBOOK", "** scaling bitmap to size " + newWidth + "x" + newHeight);
+            return Bitmap.createScaledBitmap(bmp, newWidth, newHeight, false);
+        }
+
+
 
         /*
         * The following functions are originally from
@@ -958,19 +1103,20 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
         */
         private File storeImage(Bitmap bmp, String fileName) throws IOException {
 
-            Log.d("ZBOOK", "storeImage init " + fileName);
+            Log.d("ZETBOOK", "** saving file (from bitmap)");
 
             int index = fileName.lastIndexOf('.');
             // Add file name prefix here since Android crashes when filename is number
             String name = "tmp-" + fileName.substring(0, index);
             String ext = fileName.substring(index);
             File file = File.createTempFile(name, ext);
+            Log.d("ZETBOOK", "** creatimg temp file: " +  file.getAbsolutePath());
             OutputStream outStream = new FileOutputStream(file);
 
             if (ext.compareToIgnoreCase(".png") == 0) {
                 // Log.d("ZBOOK", "storeImage png" + fileName);
                 bmp.compress(Bitmap.CompressFormat.PNG, quality, outStream);
-            } 
+            }
             else if(ext.compareToIgnoreCase(".jpg") == 0 || ext.compareToIgnoreCase(".jpeg") == 0) {
                 // Log.d("ZBOOK", "storeImage jpg" + fileName);
                 bmp.compress(Bitmap.CompressFormat.JPEG, quality, outStream);
@@ -984,6 +1130,38 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
 
             return file;
         }
+
+        private File storeImage(File originalFile) throws IOException {
+
+            Log.d("ZETBOOK", "** saving file (as copy of original)");
+
+            String fileName = originalFile.getName();
+            InputStream inStream = new FileInputStream(originalFile);
+
+
+            int index = fileName.lastIndexOf('.');
+            // Add file name prefix here since Android crashes when filename is number
+            String name =  "tmp-" + fileName.substring(0, index);
+            String ext = fileName.substring(index);
+            File file = File.createTempFile(name, ext);
+
+            OutputStream outStream = new FileOutputStream(file);
+
+            byte[] buffer = new byte[4096]; // Adjust if you want
+            int bytesRead;
+            while ((bytesRead = inStream.read(buffer)) != -1)
+            {
+                outStream.write(buffer, 0, bytesRead);
+            }
+
+
+            outStream.flush();
+            outStream.close();
+            inStream.close();
+
+            return file;
+        }
+
 
         private Bitmap getResizedBitmap(Bitmap bm, float factor) {
             int width = bm.getWidth();
@@ -1003,17 +1181,19 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
 
     private int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
         // Raw height and width of image
-        final int height = options.outHeight;
-        final int width = options.outWidth;
-        int inSampleSize = 1;
+        return calculateInSampleSize(options.outWidth, options.outHeight, reqWidth, reqHeight);
+    }
 
+    private int calculateInSampleSize(int width, int height, int reqWidth, int reqHeight) {
+
+        int inSampleSize = 1;
         if (height > reqHeight || width > reqWidth) {
             final int halfHeight = height / 2;
             final int halfWidth = width / 2;
 
             // Calculate the largest inSampleSize value that is a power of 2 and keeps both
             // height and width larger than the requested height and width.
-            while ((halfHeight / inSampleSize) > reqHeight && (halfWidth / inSampleSize) > reqWidth) {
+            while ((halfHeight / (inSampleSize)) > reqHeight && (halfWidth / (inSampleSize)) > reqWidth) {
                 inSampleSize *= 2;
             }
         }
@@ -1026,13 +1206,16 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
         return (int)Math.pow(logBaseTwo + 1, 2);
     }
 
-    private float calculateScale(int width, int height) {
+
+    private float calculateScale(int width, int height, int desiredWidth, int desiredHeight ) {
         float widthScale = 1.0f;
         float heightScale = 1.0f;
         float scale = 1.0f;
+
         if (desiredWidth > 0 || desiredHeight > 0) {
             if (desiredHeight == 0 && desiredWidth < width) {
                 scale = (float)desiredWidth/width;
+
             } else if (desiredWidth == 0 && desiredHeight < height) {
                 scale = (float)desiredHeight/height;
             } else {
@@ -1051,5 +1234,9 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
         }
 
         return scale;
+    }
+
+    private float calculateScale(int width, int height) {
+        return calculateScale(width, height, this.desiredWidth, this.desiredHeight);
     }
 }

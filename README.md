@@ -1,3 +1,9 @@
+Warning !
+=========
+
+This fork is customized for app Zetbook. It does not work same as documentation says.
+
+
 cordova-imagePicker
 ===================
 
