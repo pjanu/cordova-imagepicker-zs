@@ -693,7 +693,7 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                     int originalPhotoHeight = options.outHeight;
 
                     // Swith width and height if rotated 90 or 270 deg
-                    if(originalPhotoHeight > originalPhotoWidth && (orientation == ExifInterface.ORIENTATION_ROTATE_90 || orientation == ExifInterface.ORIENTATION_ROTATE_270))
+                    if(/*originalPhotoHeight > originalPhotoWidth && */(orientation == ExifInterface.ORIENTATION_ROTATE_90 || orientation == ExifInterface.ORIENTATION_ROTATE_270))
                     {
                         originalPhotoHeight = options.outWidth;
                         originalPhotoWidth = options.outHeight;
