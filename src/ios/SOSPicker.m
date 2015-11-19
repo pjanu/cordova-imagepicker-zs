@@ -11,6 +11,7 @@
 #import "ELCImagePickerController.h"
 #import "ELCAssetTablePicker.h"
 #import "PhotoAttributes.h"
+#import "PhotoResize.h"
 #import "AssetIdentifier.h"
 
 #define CDV_PHOTO_PREFIX @"cdv_photo_"
@@ -68,40 +69,51 @@
         // From ELCImagePickerController.m
 
         @autoreleasepool {
-            UIImage *image;
 
-            @try
-            {
-                filePath = [self getFilePath:fileMgr inDir:docsPath size:targetSize];
+            PhotoAttributes *attributes = [[PhotoAttributes alloc] init];
 
-                if(self.width == 0 && self.height == 0)
+            NSDictionary *resizes = [NSDictionary dictionaryWithObjectsAndKeys:[PhotoResize resizeWithCGSize:targetSize], @"largePhotoName",
+                                            [PhotoResize resizeForThumbnail], @"thumbnailName",
+                                            [PhotoResize resizeForMini], @"miniPhotoName",
+                                            nil];
+
+            NSMutableDictionary *images = [[NSMutableDictionary alloc] init];
+
+            for (NSString *key in resizes) {
+
+                @try
                 {
-                    image = [self originalToFile:asset file:filePath];
+                    PhotoResize *resize = [resizes objectForKey:key];
+                    filePath = [self getFilePath:fileMgr inDir:docsPath size:resize.size];
+
+                    if(self.width == 0 && self.height == 0)
+                    {
+                        [images setValue:[self originalToFile:asset file:filePath] forKey:key];
+                    }
+                    else
+                    {
+                        [images setValue:[self resizeToFile:asset file:filePath toSize:resize.size] forKey:key];
+                    }
+
+                    [attributes setValue:[[NSURL fileURLWithPath:filePath] absoluteString] forKey:key];
                 }
-                else
+                @catch (NSException *exception)
                 {
-                    image = [self resizeToFile:asset file:filePath toSize:targetSize];
+                    result = [CDVPluginResult resultWithStatus:CDVCommandStatus_IO_EXCEPTION messageAsString:[exception name]];
+                    break;
                 }
-            }
-            @catch (NSException *exception)
-            {
-                result = [CDVPluginResult resultWithStatus:CDVCommandStatus_IO_EXCEPTION messageAsString:[exception name]];
-                break;
             }
 
             ALAssetRepresentation *assetRep = [asset defaultRepresentation];
             CGImageRef imgRef = [assetRep fullResolutionImage];
 
-            filePath = [[NSURL fileURLWithPath:filePath] absoluteString];
-            PhotoAttributes *attributes = [[PhotoAttributes alloc] init];
             attributes.originalFilePath = [[AssetIdentifier alloc] initWithAsset:asset].url;
             attributes.originalPhotoWidth = [NSNumber numberWithInteger:CGImageGetWidth(imgRef)];
             attributes.originalPhotoHeight = [NSNumber numberWithInteger:CGImageGetHeight(imgRef)];
-            attributes.finalWidth = [NSNumber numberWithInteger:image.size.width];
-            attributes.finalHeight = [NSNumber numberWithInteger:image.size.height];
-            attributes.largePhotoName = filePath;
-            attributes.thumbnailName = filePath;
-            attributes.miniPhotoName = filePath;
+
+            UIImage *largeImage = [images objectForKey:@"largePhotoName"];
+            attributes.finalWidth = [NSNumber numberWithInteger:largeImage.size.width];
+            attributes.finalHeight = [NSNumber numberWithInteger:largeImage.size.height];
             [resultStrings addObject:[attributes toJSONString]];
         }
 	}
@@ -155,7 +167,7 @@
     }
 }
 
--(UIImage *)originalToFile:(ALAsset *)asset file:(NSString *)filePath {
+- (UIImage *)originalToFile:(ALAsset *)asset file:(NSString *)filePath {
     ALAssetRepresentation *assetRep = [asset defaultRepresentation];
     CGImageRef imgRef = [assetRep fullResolutionImage];
     UIImageOrientation orientation = [assetRep orientation];

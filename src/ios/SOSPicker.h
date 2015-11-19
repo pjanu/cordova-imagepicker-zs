@@ -16,7 +16,8 @@
 
 - (void) getPictures:(CDVInvokedUrlCommand *)command;
 - (UIImage*)imageByScalingNotCroppingForSize:(UIImage*)anImage toSize:(CGSize)frameSize;
-- (UIImage*)resize:(ALAsset *)asset file:(NSString *)filePath toSize:(CGSize)targetSize;
+- (UIImage*)resizeToFile:(ALAsset *)asset file:(NSString *)filePath toSize:(CGSize)targetSize;
+- (UIImage *)originalToFile:(ALAsset *)asset file:(NSString *)filePath;
 
 @property (nonatomic, assign) NSInteger width;
 @property (nonatomic, assign) NSInteger height;
