@@ -30,7 +30,7 @@
 
 	// Create the an album controller and image picker
 	ELCAlbumPickerController *albumController = [[ELCAlbumPickerController alloc] init];
-	
+
 	if (maximumImagesCount == 1) {
       albumController.immediateReturn = true;
       albumController.singleSelection = true;
@@ -40,7 +40,7 @@
    }
 
     albumController.selected = selected;
-   
+
    ELCImagePickerController *imagePicker = [[ELCImagePickerController alloc] initWithRootViewController:albumController];
    imagePicker.maximumImagesCount = maximumImagesCount;
    imagePicker.returnsOriginalImage = 1;
@@ -58,64 +58,54 @@
 - (void)elcImagePickerController:(ELCImagePickerController *)picker didFinishPickingMediaWithInfo:(NSArray *)info {
 	CDVPluginResult* result = nil;
 	NSMutableArray *resultStrings = [[NSMutableArray alloc] init];
-    NSData* data = nil;
     NSString* docsPath = [NSTemporaryDirectory()stringByStandardizingPath];
-    NSError* err = nil;
     NSFileManager* fileMgr = [[NSFileManager alloc] init];
     NSString* filePath;
     ALAsset* asset = nil;
-    UIImageOrientation orientation = UIImageOrientationUp;;
     CGSize targetSize = CGSizeMake(self.width, self.height);
 	for (NSDictionary *dict in info) {
         asset = [dict objectForKey:@"ALAsset"];
         // From ELCImagePickerController.m
 
-        int i = 1;
-        do {
-            filePath = [NSString stringWithFormat:@"%@/%@%03d.%@", docsPath, CDV_PHOTO_PREFIX, i++, @"jpg"];
-        } while ([fileMgr fileExistsAtPath:filePath]);
-        
         @autoreleasepool {
-            ALAssetRepresentation *assetRep = [asset defaultRepresentation];
-            CGImageRef imgRef = NULL;
-            
-            //defaultRepresentation returns image as it appears in photo picker, rotated and sized,
-            //so use UIImageOrientationUp when creating our image below.
-            if (picker.returnsOriginalImage) {
-                imgRef = [assetRep fullResolutionImage];
-                orientation = [assetRep orientation];
-            } else {
-                imgRef = [assetRep fullScreenImage];
-            }
+            UIImage *image;
 
-            UIImage* image = [UIImage imageWithCGImage:imgRef scale:1.0f orientation:orientation];
-            if (self.width == 0 && self.height == 0) {
-                data = UIImageJPEGRepresentation(image, self.quality/100.0f);
-            } else {
-                image = [self imageByScalingNotCroppingForSize:image toSize:targetSize];
-                data = UIImageJPEGRepresentation(image, self.quality/100.0f);
+            @try
+            {
+                filePath = [self getFilePath:fileMgr inDir:docsPath size:targetSize];
+
+                if(self.width == 0 && self.height == 0)
+                {
+                    image = [self originalToFile:asset file:filePath];
+                }
+                else
+                {
+                    image = [self resizeToFile:asset file:filePath toSize:targetSize];
+                }
             }
-            
-            if (![data writeToFile:filePath options:NSAtomicWrite error:&err]) {
-                result = [CDVPluginResult resultWithStatus:CDVCommandStatus_IO_EXCEPTION messageAsString:[err localizedDescription]];
+            @catch (NSException *exception)
+            {
+                result = [CDVPluginResult resultWithStatus:CDVCommandStatus_IO_EXCEPTION messageAsString:[exception name]];
                 break;
-            } else {
-                filePath = [[NSURL fileURLWithPath:filePath] absoluteString];
-                PhotoAttributes *attributes = [[PhotoAttributes alloc] init];
-                attributes.originalFilePath = [[AssetIdentifier alloc] initWithAsset:asset].url;
-                attributes.originalPhotoWidth = [NSNumber numberWithInteger:CGImageGetWidth(imgRef)];
-                attributes.originalPhotoHeight = [NSNumber numberWithInteger:CGImageGetHeight(imgRef)];
-                attributes.finalWidth = [NSNumber numberWithInteger:image.size.width];
-                attributes.finalHeight = [NSNumber numberWithInteger:image.size.height];
-                attributes.largePhotoName = filePath;
-                attributes.thumbnailName = filePath;
-                attributes.miniPhotoName = filePath;
-                [resultStrings addObject:[attributes toJSONString]];
             }
-        }
 
+            ALAssetRepresentation *assetRep = [asset defaultRepresentation];
+            CGImageRef imgRef = [assetRep fullResolutionImage];
+
+            filePath = [[NSURL fileURLWithPath:filePath] absoluteString];
+            PhotoAttributes *attributes = [[PhotoAttributes alloc] init];
+            attributes.originalFilePath = [[AssetIdentifier alloc] initWithAsset:asset].url;
+            attributes.originalPhotoWidth = [NSNumber numberWithInteger:CGImageGetWidth(imgRef)];
+            attributes.originalPhotoHeight = [NSNumber numberWithInteger:CGImageGetHeight(imgRef)];
+            attributes.finalWidth = [NSNumber numberWithInteger:image.size.width];
+            attributes.finalHeight = [NSNumber numberWithInteger:image.size.height];
+            attributes.largePhotoName = filePath;
+            attributes.thumbnailName = filePath;
+            attributes.miniPhotoName = filePath;
+            [resultStrings addObject:[attributes toJSONString]];
+        }
 	}
-	
+
 	if (nil == result) {
 		result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:resultStrings];
 	}
@@ -130,6 +120,54 @@
     NSArray* emptyArray = [NSArray array];
 	pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:emptyArray];
 	[self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackId];
+}
+
+- (NSString *)getFilePath:(NSFileManager *)fileMgr inDir:(NSString *)directory size:(CGSize)size {
+    NSString *filePath;
+
+    NSString *resize = [NSString stringWithFormat:@"%dx%d_", (int)size.width, (int)size.height];
+
+    int i = 1;
+    do {
+        filePath = [NSString stringWithFormat:@"%@/%@%@%03d.%@", directory, CDV_PHOTO_PREFIX, resize, i++, @"jpg"];
+    } while ([fileMgr fileExistsAtPath:filePath]);
+
+    return filePath;
+}
+
+-(UIImage *)resizeToFile:(ALAsset *)asset file:(NSString *)filePath toSize:(CGSize)targetSize {
+    @autoreleasepool {
+        UIImageOrientation orientation = UIImageOrientationUp;
+        ALAssetRepresentation *assetRep = [asset defaultRepresentation];
+        CGImageRef imgRef = [assetRep fullResolutionImage];
+
+        UIImage *image = [UIImage imageWithCGImage:imgRef scale:1.0f orientation:orientation];
+        image = [self imageByScalingNotCroppingForSize:image toSize:targetSize];
+        NSData *data = UIImageJPEGRepresentation(image, self.quality/100.0f);
+        NSError *err;
+
+        if (![data writeToFile:filePath options:NSAtomicWrite error:&err]) {
+            NSException *exception = [NSException exceptionWithName:[err localizedDescription] reason:nil userInfo:nil];
+            @throw exception;
+        };
+
+        return image;
+    }
+}
+
+-(UIImage *)originalToFile:(ALAsset *)asset file:(NSString *)filePath {
+    ALAssetRepresentation *assetRep = [asset defaultRepresentation];
+    CGImageRef imgRef = [assetRep fullResolutionImage];
+    UIImageOrientation orientation = [assetRep orientation];
+    UIImage *image = [UIImage imageWithCGImage:imgRef scale:1.0f orientation:orientation];
+    NSData *data = UIImageJPEGRepresentation(image, self.quality/100.0f);
+    NSError *err;
+    if (![data writeToFile:filePath options:NSAtomicWrite error:&err]) {
+        NSException *exception = [NSException exceptionWithName:[err localizedDescription] reason:nil userInfo:nil];
+        @throw exception;
+    }
+
+    return image;
 }
 
 - (UIImage*)imageByScalingNotCroppingForSize:(UIImage*)anImage toSize:(CGSize)frameSize
