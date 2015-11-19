@@ -87,22 +87,29 @@
             } else {
                 imgRef = [assetRep fullScreenImage];
             }
-            
+
             UIImage* image = [UIImage imageWithCGImage:imgRef scale:1.0f orientation:orientation];
             if (self.width == 0 && self.height == 0) {
                 data = UIImageJPEGRepresentation(image, self.quality/100.0f);
             } else {
-                UIImage* scaledImage = [self imageByScalingNotCroppingForSize:image toSize:targetSize];
-                data = UIImageJPEGRepresentation(scaledImage, self.quality/100.0f);
+                image = [self imageByScalingNotCroppingForSize:image toSize:targetSize];
+                data = UIImageJPEGRepresentation(image, self.quality/100.0f);
             }
             
             if (![data writeToFile:filePath options:NSAtomicWrite error:&err]) {
                 result = [CDVPluginResult resultWithStatus:CDVCommandStatus_IO_EXCEPTION messageAsString:[err localizedDescription]];
                 break;
             } else {
-                NSString *url = [[NSURL fileURLWithPath:filePath] absoluteString];
-                PhotoAttributes *attributes = [[PhotoAttributes alloc] initWithFilePath:url];
+                filePath = [[NSURL fileURLWithPath:filePath] absoluteString];
+                PhotoAttributes *attributes = [[PhotoAttributes alloc] init];
                 attributes.originalFilePath = [[AssetIdentifier alloc] initWithAsset:asset].url;
+                attributes.originalPhotoWidth = [NSNumber numberWithInteger:CGImageGetWidth(imgRef)];
+                attributes.originalPhotoHeight = [NSNumber numberWithInteger:CGImageGetHeight(imgRef)];
+                attributes.finalWidth = [NSNumber numberWithInteger:image.size.width];
+                attributes.finalHeight = [NSNumber numberWithInteger:image.size.height];
+                attributes.largePhotoName = filePath;
+                attributes.thumbnailName = filePath;
+                attributes.miniPhotoName = filePath;
                 [resultStrings addObject:[attributes toJSONString]];
             }
         }

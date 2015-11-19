@@ -7,6 +7,10 @@
 
 @implementation PhotoAttributes
 
+-(id)init {
+    return [self initWithFilePath:@""];
+}
+
 -(id)initWithFilePath:(NSString *)filePath {
     self = [super init];
 
