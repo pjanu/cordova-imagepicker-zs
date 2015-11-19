@@ -10,6 +10,7 @@
 #import "ELCAlbumPickerController.h"
 #import "ELCImagePickerController.h"
 #import "ELCAssetTablePicker.h"
+#import "PhotoAttributes.h"
 
 #define CDV_PHOTO_PREFIX @"cdv_photo_"
 
@@ -95,7 +96,9 @@
                 result = [CDVPluginResult resultWithStatus:CDVCommandStatus_IO_EXCEPTION messageAsString:[err localizedDescription]];
                 break;
             } else {
-                [resultStrings addObject:[[NSURL fileURLWithPath:filePath] absoluteString]];
+                NSString *url = [[NSURL fileURLWithPath:filePath] absoluteString];
+                PhotoAttributes *attributes = [[PhotoAttributes alloc] initWithFilePath:url];
+                [resultStrings addObject:[attributes toJSONString];
             }
         }
 
