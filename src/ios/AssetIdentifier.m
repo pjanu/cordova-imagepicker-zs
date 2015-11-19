@@ -12,9 +12,11 @@
 
     if(self)
     {
+        NSURL *url = asset.defaultRepresentation.url;
+        NSURLComponents *query = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];
         NSPredicate *predicate = [NSPredicate predicateWithFormat:@"name=%@", @"id"];
-        NSURLComponents *query = [NSURLComponents componentsWithURL:asset.defaultRepresentation.url resolvingAgainstBaseURL:NO];
         self.identifier = [[query.queryItems filteredArrayUsingPredicate:predicate] firstObject].value;
+        self.url = [url absoluteString];
     }
 
     return self;

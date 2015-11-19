@@ -8,9 +8,10 @@
 @interface AssetIdentifier : NSObject
 
 @property NSString *identifier;
+@property NSString *url;
 
 -(id)initWithAsset:(ALAsset *)asset;
 
--(BOOL)isEqualWithIdentifier:(AssetIdentifier *)identifier;
+-(BOOL)isEqualWithIdentifier:(AssetIdentifier *)other;
 
 @end

@@ -11,6 +11,7 @@
 #import "ELCImagePickerController.h"
 #import "ELCAssetTablePicker.h"
 #import "PhotoAttributes.h"
+#import "AssetIdentifier.h"
 
 #define CDV_PHOTO_PREFIX @"cdv_photo_"
 
@@ -22,6 +23,7 @@
 	NSDictionary *options = [command.arguments objectAtIndex: 0];
 
 	NSInteger maximumImagesCount = [[options objectForKey:@"maximumImagesCount"] integerValue];
+    NSArray *selected = [[options objectForKey:@"selected"] componentsSeparatedByString:@";"];
 	self.width = [[options objectForKey:@"width"] integerValue];
 	self.height = [[options objectForKey:@"height"] integerValue];
 	self.quality = [[options objectForKey:@"quality"] integerValue];
@@ -36,6 +38,8 @@
       albumController.immediateReturn = false;
       albumController.singleSelection = false;
    }
+
+    albumController.selected = selected;
    
    ELCImagePickerController *imagePicker = [[ELCImagePickerController alloc] initWithRootViewController:albumController];
    imagePicker.maximumImagesCount = maximumImagesCount;
@@ -98,7 +102,8 @@
             } else {
                 NSString *url = [[NSURL fileURLWithPath:filePath] absoluteString];
                 PhotoAttributes *attributes = [[PhotoAttributes alloc] initWithFilePath:url];
-                [resultStrings addObject:[attributes toJSONString];
+                attributes.originalFilePath = [[AssetIdentifier alloc] initWithAsset:asset].url;
+                [resultStrings addObject:[attributes toJSONString]];
             }
         }
 

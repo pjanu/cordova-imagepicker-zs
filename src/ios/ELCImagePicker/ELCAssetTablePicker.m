@@ -9,6 +9,7 @@
 #import "ELCAssetCell.h"
 #import "ELCAsset.h"
 #import "ELCAlbumPickerController.h"
+#import "AssetIdentifier.h"
 
 @interface ELCAssetTablePicker ()
 
@@ -92,6 +93,8 @@
                 [self.elcAssets addObject:elcAsset];
             }
 
+            BOOL isSelected = [self.selected containsObject:[[AssetIdentifier alloc] initWithAsset:result].url];
+            [elcAsset setSelected:isSelected];
          }];
 
         dispatch_sync(dispatch_get_main_queue(), ^{
