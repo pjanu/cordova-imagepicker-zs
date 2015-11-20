@@ -10,6 +10,7 @@
 #import "ELCAsset.h"
 #import "ELCAlbumPickerController.h"
 #import "AssetIdentifier.h"
+#import "LocalizedString.h"
 
 @interface ELCAssetTablePicker ()
 
@@ -43,9 +44,9 @@
     if (self.immediateReturn) {
         
     } else {
-        UIBarButtonItem *doneButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(doneAction:)];
+        UIBarButtonItem *doneButtonItem = [[UIBarButtonItem alloc] initWithTitle:[LocalizedString get:@"Done"] style:UIBarButtonItemStyleDone target:self action:@selector(doneAction:)];
         [self.navigationItem setRightBarButtonItem:doneButtonItem];
-        [self setTitle:@"Loading..."];
+        [self setTitle:[LocalizedString get:@"Loading..."]];
     }
 
 	[self performSelectorInBackground:@selector(preparePhotos) withObject:nil];
@@ -110,7 +111,7 @@
                                                       animated:NO];
             }
             
-            NSString *title = self.singleSelection ? @"Pick Photo" : [self getSelectedCountTitle];
+            NSString *title = self.singleSelection ? [LocalizedString get:@"Pick Photo"] : [self getSelectedCountTitle];
             [self setTitle:title];
         });
     }
@@ -121,7 +122,7 @@
 }
 
 - (NSString *)getSelectedCountTitle {
-    return [NSString stringWithFormat:@"%d of %d", self.selection.addPhotoCount + [self totalSelectedAssets], self.selection.maximumPhotoCount];
+    return [NSString stringWithFormat:[LocalizedString get:@"%d of %d"], self.selection.addPhotoCount + (int) [self totalSelectedAssets], self.selection.maximumPhotoCount];
 }
 
 - (void)setTitle:(NSString *)title {

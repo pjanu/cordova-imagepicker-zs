@@ -8,6 +8,7 @@
 #import "ELCAlbumPickerController.h"
 #import "ELCImagePickerController.h"
 #import "ELCAssetTablePicker.h"
+#import "LocalizedString.h"
 
 @interface ELCAlbumPickerController ()
 
@@ -26,10 +27,10 @@
 {
     [super viewDidLoad];
 	
-	[self.navigationItem setTitle:@"Loading..."];
+    [self.navigationItem setTitle:[LocalizedString get:@"Loading..."]];
 
-    UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self.parent action:@selector(cancelImagePicker)];
-	[self.navigationItem setRightBarButtonItem:cancelButton];
+    UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithTitle:[LocalizedString get:@"Cancel"] style:UIBarButtonItemStyleDone target:self.parent action:@selector(cancelImagePicker)];
+    [self.navigationItem setRightBarButtonItem:cancelButton];
 
     NSMutableArray *tempArray = [[NSMutableArray alloc] init];
 	self.assetGroups = tempArray;
@@ -67,7 +68,7 @@
             // Group Enumerator Failure Block
             void (^assetGroupEnumberatorFailure)(NSError *) = ^(NSError *error) {
                 
-                UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Error" message:[NSString stringWithFormat:@"Album Error: %@ - %@", [error localizedDescription], [error localizedRecoverySuggestion]] delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil];
+                UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Error" message:[NSString stringWithFormat:[LocalizedString get:@"Album Error: %@ - %@"], [error localizedDescription], [error localizedRecoverySuggestion]] delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil];
                 [alert show];
                 
                 NSLog(@"A problem occured %@", [error description]);	                                 
@@ -85,7 +86,7 @@
 - (void)reloadTableView
 {
 	[self.tableView reloadData];
-	[self.navigationItem setTitle:@"Select an Album"];
+    [self.navigationItem setTitle:[LocalizedString get:@"Select an Album"]];
 }
 
 - (BOOL)shouldSelectAsset:(ELCAsset *)asset previousCount:(NSUInteger)previousCount

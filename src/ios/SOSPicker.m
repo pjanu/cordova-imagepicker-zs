@@ -23,7 +23,7 @@
 - (void) getPictures:(CDVInvokedUrlCommand *)command {
 	NSDictionary *options = [command.arguments objectAtIndex: 0];
 
-	NSInteger maximumImagesCount = [[options objectForKey:@"maximumImagesCount"] integerValue];
+    NSInteger maximumImagesCount = [[options objectForKey:@"maximumImagesCount"] integerValue];
     NSInteger addImagesCount = [[options objectForKey:@"addImagesCount"] integerValue];
     NSArray *selected = [[options objectForKey:@"selected"] componentsSeparatedByString:@";"];
 	self.width = [[options objectForKey:@"width"] integerValue];
@@ -148,11 +148,11 @@
     return filePath;
 }
 
--(UIImage *)resizeToFile:(ALAsset *)asset file:(NSString *)filePath toSize:(CGSize)targetSize {
+- (UIImage *)resizeToFile:(ALAsset *)asset file:(NSString *)filePath toSize:(CGSize)targetSize {
     @autoreleasepool {
         UIImageOrientation orientation = UIImageOrientationUp;
         ALAssetRepresentation *assetRep = [asset defaultRepresentation];
-        CGImageRef imgRef = [assetRep fullResolutionImage];
+        CGImageRef imgRef = [assetRep fullScreenImage];
 
         UIImage *image = [UIImage imageWithCGImage:imgRef scale:1.0f orientation:orientation];
         image = [self imageByScalingNotCroppingForSize:image toSize:targetSize];

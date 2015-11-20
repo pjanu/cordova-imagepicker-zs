@@ -11,6 +11,7 @@
 #import "ELCAssetCell.h"
 #import "ELCAssetTablePicker.h"
 #import "ELCAlbumPickerController.h"
+#import "LocalizedString.h"
 #import <CoreLocation/CoreLocation.h>
 
 @implementation ELCImagePickerController
@@ -49,13 +50,13 @@
 {
     BOOL shouldSelect = previousCount < self.maximumImagesCount;
     if (!shouldSelect) {
-        NSString *title = [NSString stringWithFormat:NSLocalizedString(@"Maximum %d photos.", nil), self.maximumImagesCount];
-        NSString *message = [NSString stringWithFormat:NSLocalizedString(@"You can only select %d photos at a time.", nil), self.maximumImagesCount];
+        NSString *title = [NSString stringWithFormat:[LocalizedString get:@"Maximum %d photos."], self.maximumImagesCount];
+        NSString *message = [NSString stringWithFormat:[LocalizedString get:@"You can only select %d photos at a time."], self.maximumImagesCount];
         [[[UIAlertView alloc] initWithTitle:title
                                     message:message
                                    delegate:nil
                           cancelButtonTitle:nil
-                          otherButtonTitles:NSLocalizedString(@"Okay", nil), nil] show];
+                          otherButtonTitles:[LocalizedString get:@"Okay"], nil] show];
     }
     return shouldSelect;
 }
