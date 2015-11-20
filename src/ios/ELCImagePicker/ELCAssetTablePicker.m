@@ -45,7 +45,7 @@
     } else {
         UIBarButtonItem *doneButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(doneAction:)];
         [self.navigationItem setRightBarButtonItem:doneButtonItem];
-        [self.navigationItem setTitle:@"Loading..."];
+        [self setTitle:@"Loading..."];
     }
 
 	[self performSelectorInBackground:@selector(preparePhotos) withObject:nil];
@@ -93,7 +93,7 @@
                 [self.elcAssets addObject:elcAsset];
             }
 
-            BOOL isSelected = [self.selected containsObject:[[AssetIdentifier alloc] initWithAsset:result].url];
+            BOOL isSelected = [self.selection.selected containsObject:[[AssetIdentifier alloc] initWithAsset:result].url];
             [elcAsset setSelected:isSelected];
          }];
 
@@ -110,9 +110,22 @@
                                                       animated:NO];
             }
             
-            [self.navigationItem setTitle:self.singleSelection ? @"Pick Photo" : @"Pick Photos"];
+            NSString *title = self.singleSelection ? @"Pick Photo" : [self getSelectedCountTitle];
+            [self setTitle:title];
         });
     }
+}
+
+- (void)updateSelectedCount {
+    [self setTitle:[self getSelectedCountTitle]];
+}
+
+- (NSString *)getSelectedCountTitle {
+    return [NSString stringWithFormat:@"%d of %d", self.selection.addPhotoCount + [self totalSelectedAssets], self.selection.maximumPhotoCount];
+}
+
+- (void)setTitle:(NSString *)title {
+    [self.navigationItem setTitle:title];
 }
 
 - (void)doneAction:(id)sender
@@ -130,7 +143,7 @@
 
 - (BOOL)shouldSelectAsset:(ELCAsset *)asset
 {
-    NSUInteger selectionCount = 0;
+    NSUInteger selectionCount = self.selection.addPhotoCount;
     for (ELCAsset *elcAsset in self.elcAssets) {
         if (elcAsset.selected) selectionCount++;
     }

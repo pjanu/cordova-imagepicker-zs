@@ -24,6 +24,7 @@
 	NSDictionary *options = [command.arguments objectAtIndex: 0];
 
 	NSInteger maximumImagesCount = [[options objectForKey:@"maximumImagesCount"] integerValue];
+    NSInteger addImagesCount = [[options objectForKey:@"addImagesCount"] integerValue];
     NSArray *selected = [[options objectForKey:@"selected"] componentsSeparatedByString:@";"];
 	self.width = [[options objectForKey:@"width"] integerValue];
 	self.height = [[options objectForKey:@"height"] integerValue];
@@ -40,12 +41,12 @@
       albumController.singleSelection = false;
    }
 
-    albumController.selected = selected;
-
-   ELCImagePickerController *imagePicker = [[ELCImagePickerController alloc] initWithRootViewController:albumController];
-   imagePicker.maximumImagesCount = maximumImagesCount;
-   imagePicker.returnsOriginalImage = 1;
-   imagePicker.imagePickerDelegate = self;
+    ELCImagePickerController *imagePicker = [[ELCImagePickerController alloc] initWithRootViewController:albumController];
+    imagePicker.maximumImagesCount = maximumImagesCount;
+    imagePicker.addImagesCount = addImagesCount;
+    imagePicker.selected = selected;
+    imagePicker.returnsOriginalImage = 1;
+    imagePicker.imagePickerDelegate = self;
 
    albumController.parent = imagePicker;
 	self.callbackId = command.callbackId;

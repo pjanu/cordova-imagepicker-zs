@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "ELCAssetSelectionDelegate.h"
+#import "SelectionParameters.h"
 
 @class ELCImagePickerController;
 @class ELCAlbumPickerController;
@@ -34,6 +35,8 @@
 
 @property (nonatomic, weak) id<ELCImagePickerControllerDelegate> imagePickerDelegate;
 @property (nonatomic, assign) NSInteger maximumImagesCount;
+@property (nonatomic, assign) NSInteger addImagesCount;
+@property (nonatomic, strong) NSArray *selected;
 
 /**
  * YES if the picker should return the original image,
@@ -43,6 +46,7 @@
 
 - (id)initImagePicker;
 - (void)cancelImagePicker;
+- (SelectionParameters *)getSelection;
 
 @end
 

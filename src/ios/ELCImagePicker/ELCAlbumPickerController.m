@@ -144,7 +144,7 @@
 {
 	ELCAssetTablePicker *picker = [[ELCAssetTablePicker alloc] initWithNibName: nil bundle: nil];
 	picker.parent = self;
-    picker.selected = self.selected;
+    picker.selection = [(id) self.parent getSelection];
 
     picker.assetGroup = [self.assetGroups objectAtIndex:indexPath.row];
     [picker.assetGroup setAssetsFilter:[ALAssetsFilter allPhotos]];

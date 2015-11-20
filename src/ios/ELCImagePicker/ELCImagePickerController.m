@@ -92,4 +92,12 @@
     }
 }
 
+- (SelectionParameters *)getSelection {
+    SelectionParameters *parameters  = [[SelectionParameters alloc] init];
+    parameters.maximumPhotoCount = self.maximumImagesCount;
+    parameters.addPhotoCount = self.addImagesCount;
+    parameters.selected = self.selected;
+    return parameters;
+}
+
 @end
