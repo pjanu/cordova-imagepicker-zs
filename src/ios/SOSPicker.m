@@ -42,7 +42,7 @@
    }
 
     ELCImagePickerController *imagePicker = [[ELCImagePickerController alloc] initWithRootViewController:albumController];
-    imagePicker.maximumImagesCount = maximumImagesCount;
+    imagePicker.maximumImagesCount = maximumImagesCount + addImagesCount;
     imagePicker.addImagesCount = addImagesCount;
     imagePicker.selected = selected;
     imagePicker.returnsOriginalImage = 1;
