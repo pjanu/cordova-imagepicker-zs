@@ -2,7 +2,7 @@
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
   xmlns:android="http://schemas.android.com/apk/res/android"
   id="com.synconset.imagepicker-zetbook"
-  version="1.0.28">
+  version="1.0.29">
 
 	<name>ImagePicker Zetbook</name>
 
@@ -30,6 +30,18 @@
 
 		<header-file src="src/ios/SOSPicker.h" />
 		<source-file src="src/ios/SOSPicker.m" />
+
+		<header-file src="src/ios/AssetIdentifier.h" />
+		<source-file src="src/ios/AssetIdentifier.m" />
+
+		<header-file src="src/ios/PhotoAttributes.h" />
+		<source-file src="src/ios/PhotoAttributes.m" />
+
+		<header-file src="src/ios/PhotoResize.h" />
+		<source-file src="src/ios/PhotoResize.m" />
+
+		<header-file src="src/ios/SelectionParameters.h" />
+		<source-file src="src/ios/SelectionParameters.m" />
 
 		<header-file src="src/ios/ELCImagePicker/ELCAlbumPickerController.h" />
 		<source-file src="src/ios/ELCImagePicker/ELCAlbumPickerController.m" />
