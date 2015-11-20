@@ -4,6 +4,7 @@
 //
 
 #import "AssetIdentifier.h"
+#import "URLQueryItems.h"
 
 @implementation AssetIdentifier
 
@@ -14,8 +15,7 @@
     {
         NSURL *url = asset.defaultRepresentation.url;
         NSURLComponents *query = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];
-        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"name=%@", @"id"];
-        self.identifier = [[query.queryItems filteredArrayUsingPredicate:predicate] firstObject].value;
+        self.identifier = [[URLQueryItems itemsWithQueryString:query.query] valueForParameter:@"id"];
         self.url = [url absoluteString];
     }
 
