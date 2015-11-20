@@ -2,7 +2,7 @@
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
   xmlns:android="http://schemas.android.com/apk/res/android"
   id="com.synconset.imagepicker-zetbook"
-  version="1.0.29">
+  version="1.0.30">
 
 	<name>ImagePicker Zetbook</name>
 
@@ -42,6 +42,15 @@
 
 		<header-file src="src/ios/SelectionParameters.h" />
 		<source-file src="src/ios/SelectionParameters.m" />
+
+		<header-file src="src/ios/URLQueryItems.h" />
+		<source-file src="src/ios/URLQueryItems.m" />
+
+		<header-file src="src/ios/URLQueryItem.h" />
+		<source-file src="src/ios/URLQueryItem.m" />
+
+		<header-file src="src/ios/LocalizedString.h" />
+		<source-file src="src/ios/LocalizedString.m" />
 
 		<header-file src="src/ios/ELCImagePicker/ELCAlbumPickerController.h" />
 		<source-file src="src/ios/ELCImagePicker/ELCAlbumPickerController.m" />
