@@ -33,7 +33,8 @@ ImagePicker.prototype.getPictures = function(success, fail, options) {
 		height: options.height ? options.height : 0,
 		quality: options.quality ? options.quality : 100,
 		selected: options.selected ? options.selected : "",
-		selectedColor: options.selectedColor ? options.selectedColor : 0
+		selectedColor: options.selectedColor ? options.selectedColor : 0,
+		orientation: options.orientation ? options.orientation : 'any'
 	};
 
 	return cordova.exec(success, fail, "ImagePicker", "getPictures", [params]);

@@ -34,6 +34,7 @@ public class ImagePicker extends CordovaPlugin {
 			int quality = 100;
 			String selectedFileNames = "";
 			int selectedColor = 0;
+			String orientation = "any";
 			if (this.params.has("maximumImagesCount")) {
 				max = this.params.getInt("maximumImagesCount");
 			}
@@ -55,6 +56,9 @@ public class ImagePicker extends CordovaPlugin {
 			if (this.params.has("selectedColor")) {
 				selectedColor = this.params.getInt("selectedColor");
 			}
+			if (this.params.has("orientation")) {
+				orientation = this.params.getString("orientation");
+			}
 			intent.putExtra("SELECTED_COLOR", selectedColor);
 			intent.putExtra("MAX_IMAGES", max);
 			intent.putExtra("ADD_IMAGES", add);
@@ -62,6 +66,7 @@ public class ImagePicker extends CordovaPlugin {
 			intent.putExtra("HEIGHT", desiredHeight);
 			intent.putExtra("QUALITY", quality);
 			intent.putExtra("SELECTED_KEY", selectedFileNames);
+			intent.putExtra("VIEW_ORIENTATION", orientation);
 			if (this.cordova != null) {
 				this.cordova.startActivityForResult((CordovaPlugin) this, intent, 0);
 			}

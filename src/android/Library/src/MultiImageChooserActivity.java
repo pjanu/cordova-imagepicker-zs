@@ -111,6 +111,7 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
     public static final String SELECTED_KEY = "SELECTED_KEY";
     public static final String ADD_IMAGES = "ADD_IMAGES";
     public static final String SELECTED_COLOR_KEY = "SELECTED_COLOR";
+    public static final String VIEW_ORIENTATION = "VIEW_ORIENTATION";
 
     private ImageAdapter ia;
 
@@ -147,6 +148,7 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
 
     private boolean lockPicker = false;
     private String alreadySelectedFileNames = "";
+    private String viewOrientation = "any";
 
 
     private String selectedLang = "en";
@@ -190,8 +192,18 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
         // Log.d("ZETBOOK", "onCreate");
         super.onCreate(savedInstanceState);
         fakeR = new FakeR(this);
-        // Fix orientation to landscape - call this before setContentView
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+
+        // Fix orientation - call this before setContentView
+        viewOrientation = getIntent().getStringExtra(VIEW_ORIENTATION);
+        if(viewOrientation.equals("landscape"))
+        {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        }
+        else if(viewOrientation.equals("portrait"))
+        {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        }
+
         setContentView(fakeR.getId("layout", "multiselectorgrid"));
         fileNames.clear();
         fileNamesRemoved.clear();
