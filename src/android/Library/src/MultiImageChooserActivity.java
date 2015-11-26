@@ -689,17 +689,21 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                     File originalFile = new File(imageInfo.getKey());
                     String originalFileName = originalFile.getName(),
                            originalFilePath = originalFile.getAbsolutePath();
-                    File tmpFile;
 
+                    File tmpFile;
 
                     BitmapFactory.Options options = new BitmapFactory.Options();
                     options.inSampleSize = 1;
                     options.inJustDecodeBounds = true;
                     BitmapFactory.decodeFile(originalFilePath, options);
 
-                    // Get exif orientation
+                    // Get exif orientation and metadata
                     ExifInterface exif = new ExifInterface(originalFilePath);
                     int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
+                    String origExifLat = exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE),
+                           origExifLon = exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE),
+                           origExifDate = exif.getAttribute(ExifInterface.TAG_DATETIME);
+
 
                     int originalPhotoWidth = options.outWidth;
                     int originalPhotoHeight = options.outHeight;
@@ -943,6 +947,9 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                         jsonObj.put("finalWidth", finalWidth);
                         jsonObj.put("finalHeight", finalHeight);
                         jsonObj.put("finalOrientation", orientation);
+                        jsonObj.put("origExifDate", origExifDate);
+                        jsonObj.put("origExifLon", origExifLon);
+                        jsonObj.put("origExifLat", origExifLat);
 
                         Log.d("ZJSON", jsonObj.toString());
                     }
