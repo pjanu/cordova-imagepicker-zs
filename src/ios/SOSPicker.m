@@ -177,7 +177,7 @@
 - (UIImage *)originalToFile:(ALAsset *)asset file:(NSString *)filePath {
     ALAssetRepresentation *assetRep = [asset defaultRepresentation];
     CGImageRef imgRef = [assetRep fullResolutionImage];
-    UIImageOrientation orientation = [assetRep orientation];
+    UIImageOrientation orientation = (UIImageOrientation) [assetRep orientation];
     UIImage *image = [UIImage imageWithCGImage:imgRef scale:1.0f orientation:orientation];
     NSData *data = UIImageJPEGRepresentation(image, self.quality/100.0f);
     NSError *err;
