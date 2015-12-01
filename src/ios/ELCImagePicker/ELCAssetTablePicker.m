@@ -121,7 +121,9 @@
 }
 
 - (NSString *)getSelectedCountTitle {
-    return [NSString stringWithFormat:[LocalizedString get:@"%d of %d"], self.selection.addPhotoCount + (int) [self totalSelectedAssets], self.selection.maximumPhotoCount];
+    NSString *placeholder = [self.titleStyle getPlaceholderString];
+    NSInteger selected = self.selection.addPhotoCount + (int) [self totalSelectedAssets];
+    return [NSString stringWithFormat:[LocalizedString get:placeholder], selected, self.selection.maximumPhotoCount];
 }
 
 - (void)setTitle:(NSString *)title {

@@ -13,6 +13,7 @@
 #import "PhotoAttributes.h"
 #import "PhotoResize.h"
 #import "AssetIdentifier.h"
+#import "AssetPickerTitleStyle.h"
 
 #define CDV_PHOTO_PREFIX @"cdv_photo_"
 
@@ -21,11 +22,12 @@
 @synthesize callbackId;
 
 - (void) getPictures:(CDVInvokedUrlCommand *)command {
-	NSDictionary *options = [command.arguments objectAtIndex: 0];
+    NSDictionary *options = [command.arguments objectAtIndex: 0];
 
     NSInteger maximumImagesCount = [[options objectForKey:@"maximumImagesCount"] integerValue];
     NSInteger addImagesCount = [[options objectForKey:@"addImagesCount"] integerValue];
     NSArray *selected = [[options objectForKey:@"selected"] componentsSeparatedByString:@";"];
+    NSString *titleStyle = [options objectForKey:@"titleStyle"];
 	self.width = [[options objectForKey:@"width"] integerValue];
 	self.height = [[options objectForKey:@"height"] integerValue];
 	self.quality = [[options objectForKey:@"quality"] integerValue];
@@ -42,6 +44,7 @@
    }
 
     ELCImagePickerController *imagePicker = [[ELCImagePickerController alloc] initWithRootViewController:albumController];
+    imagePicker.titleStyle = [AssetPickerTitleStyle titleStyleWithStyle:titleStyle];
     imagePicker.maximumImagesCount = maximumImagesCount + addImagesCount;
     imagePicker.addImagesCount = addImagesCount;
     imagePicker.selected = selected;

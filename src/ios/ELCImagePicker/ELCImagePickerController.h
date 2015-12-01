@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "ELCAssetSelectionDelegate.h"
 #import "SelectionParameters.h"
+#import "AssetPickerTitleStyle.h"
 
 @class ELCImagePickerController;
 @class ELCAlbumPickerController;
@@ -37,6 +38,7 @@
 @property (nonatomic, assign) NSInteger maximumImagesCount;
 @property (nonatomic, assign) NSInteger addImagesCount;
 @property (nonatomic, strong) NSArray *selected;
+@property (nonatomic, strong) AssetPickerTitleStyle *titleStyle;
 
 /**
  * YES if the picker should return the original image,
