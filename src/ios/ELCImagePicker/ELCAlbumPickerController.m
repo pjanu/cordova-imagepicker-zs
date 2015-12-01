@@ -147,6 +147,7 @@
 	picker.parent = self;
     picker.selection = [(id) self.parent getSelection];
     picker.titleStyle = [(id) self.parent titleStyle];
+    picker.limitedOrientation = [(id) self.parent limitedOrientation];
 
     picker.assetGroup = [self.assetGroups objectAtIndex:indexPath.row];
     [picker.assetGroup setAssetsFilter:[ALAssetsFilter allPhotos]];

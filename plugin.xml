@@ -55,6 +55,9 @@
 		<header-file src="src/ios/AssetPickerTitleStyle.h" />
 		<source-file src="src/ios/AssetPickerTitleStyle.m" />
 
+		<header-file src="src/ios/InterfaceOrientation.h" />
+		<source-file src="src/ios/InterfaceOrientation.m" />
+
 		<header-file src="src/ios/ELCImagePicker/ELCAlbumPickerController.h" />
 		<source-file src="src/ios/ELCImagePicker/ELCAlbumPickerController.m" />
 

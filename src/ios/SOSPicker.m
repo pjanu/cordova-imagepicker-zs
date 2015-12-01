@@ -14,6 +14,7 @@
 #import "PhotoResize.h"
 #import "AssetIdentifier.h"
 #import "AssetPickerTitleStyle.h"
+#import "InterfaceOrientation.h"
 
 #define CDV_PHOTO_PREFIX @"cdv_photo_"
 
@@ -28,6 +29,7 @@
     NSInteger addImagesCount = [[options objectForKey:@"addImagesCount"] integerValue];
     NSArray *selected = [[options objectForKey:@"selected"] componentsSeparatedByString:@";"];
     NSString *titleStyle = [options objectForKey:@"titleStyle"];
+    NSString *orientation = [options objectForKey:@"orientation"];
 	self.width = [[options objectForKey:@"width"] integerValue];
 	self.height = [[options objectForKey:@"height"] integerValue];
 	self.quality = [[options objectForKey:@"quality"] integerValue];
@@ -44,6 +46,7 @@
    }
 
     ELCImagePickerController *imagePicker = [[ELCImagePickerController alloc] initWithRootViewController:albumController];
+    imagePicker.limitedOrientation = [InterfaceOrientation interfaceOrientationWithOrientation:orientation];
     imagePicker.titleStyle = [AssetPickerTitleStyle titleStyleWithStyle:titleStyle];
     imagePicker.maximumImagesCount = maximumImagesCount + addImagesCount;
     imagePicker.addImagesCount = addImagesCount;

@@ -12,6 +12,7 @@
 #import "ELCAssetPickerFilterDelegate.h"
 #import "SelectionParameters.h"
 #import "AssetPickerTitleStyle.h"
+#import "InterfaceOrientation.h"
 
 @interface ELCAssetTablePicker : UITableViewController <ELCAssetDelegate>
 
@@ -23,6 +24,7 @@
 @property (nonatomic, assign) BOOL immediateReturn;
 @property (nonatomic, strong) SelectionParameters *selection;
 @property (nonatomic, strong) AssetPickerTitleStyle *titleStyle;
+@property (nonatomic, strong) InterfaceOrientation *limitedOrientation;
 
 // optional, can be used to filter the assets displayed
 @property(nonatomic, weak) id<ELCAssetPickerFilterDelegate> assetPickerFilterDelegate;

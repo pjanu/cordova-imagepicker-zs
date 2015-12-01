@@ -10,6 +10,7 @@
 #import "ELCAssetSelectionDelegate.h"
 #import "SelectionParameters.h"
 #import "AssetPickerTitleStyle.h"
+#import "InterfaceOrientation.h"
 
 @class ELCImagePickerController;
 @class ELCAlbumPickerController;
@@ -39,6 +40,7 @@
 @property (nonatomic, assign) NSInteger addImagesCount;
 @property (nonatomic, strong) NSArray *selected;
 @property (nonatomic, strong) AssetPickerTitleStyle *titleStyle;
+@property (nonatomic, strong) InterfaceOrientation *limitedOrientation;
 
 /**
  * YES if the picker should return the original image,
