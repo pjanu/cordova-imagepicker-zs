@@ -25,6 +25,7 @@
 @property (nonatomic, strong) SelectionParameters *selection;
 @property (nonatomic, strong) AssetPickerTitleStyle *titleStyle;
 @property (nonatomic, strong) InterfaceOrientation *limitedOrientation;
+@property (nonatomic, strong) UIActivityIndicatorView *spinner;
 
 // optional, can be used to filter the assets displayed
 @property(nonatomic, weak) id<ELCAssetPickerFilterDelegate> assetPickerFilterDelegate;

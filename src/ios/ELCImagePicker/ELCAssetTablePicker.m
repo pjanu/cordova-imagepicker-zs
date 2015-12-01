@@ -11,6 +11,7 @@
 #import "ELCAlbumPickerController.h"
 #import "AssetIdentifier.h"
 #import "LocalizedString.h"
+#import <UIKit/UIKit.h>
 
 @interface ELCAssetTablePicker ()
 
@@ -56,6 +57,18 @@
 {
     [super viewWillAppear:animated];
     self.columns = self.view.bounds.size.width / 80;
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    self.spinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
+    self.spinner.hidesWhenStopped = YES;
+    self.spinner.frame = CGRectMake(0.0, 0.0, 60.0, 60.0);
+    CGPoint center = self.view.center;
+    center.y -= self.spinner.frame.size.height * 0.5;
+    [self.spinner setCenter:center];
+    [self.spinner setBackgroundColor:[UIColor blackColor]];
+    [self.view addSubview:self.spinner];
 }
 
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations {
@@ -131,8 +144,9 @@
 }
 
 - (void)doneAction:(id)sender
-{	
-	NSMutableArray *selectedAssetsImages = [[NSMutableArray alloc] init];
+{
+    [self spinnerAction:@selector(showSpinner)];
+    NSMutableArray *selectedAssetsImages = [[NSMutableArray alloc] init];
 	    
 	for (ELCAsset *elcAsset in self.elcAssets) {
 		if ([elcAsset selected]) {
@@ -140,6 +154,19 @@
 		}
 	}
     [self.parent selectedAssets:selectedAssetsImages];
+    [self spinnerAction:@selector(hideSpinner)];
+}
+
+-(void) spinnerAction:(SEL)method {
+    [NSThread detachNewThreadSelector:method toTarget:self withObject:nil];
+}
+
+-(void) showSpinner {
+    [self.spinner startAnimating];
+}
+
+-(void) hideSpinner {
+    [self.spinner stopAnimating];
 }
 
 
