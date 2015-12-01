@@ -15,6 +15,7 @@
 #import "AssetIdentifier.h"
 #import "AssetPickerTitleStyle.h"
 #import "InterfaceOrientation.h"
+#import <CoreLocation/CoreLocation.h>
 
 #define CDV_PHOTO_PREFIX @"cdv_photo_"
 
@@ -121,6 +122,12 @@
             UIImage *largeImage = [images objectForKey:@"largePhotoName"];
             attributes.finalWidth = [NSNumber numberWithInteger:largeImage.size.width];
             attributes.finalHeight = [NSNumber numberWithInteger:largeImage.size.height];
+
+            attributes.exifDate = [[asset valueForProperty:ALAssetPropertyDate] description];
+            CLLocation *location = [asset valueForProperty:ALAssetPropertyLocation];
+            attributes.exifLatitude = [NSNumber numberWithDouble:location.coordinate.latitude];
+            attributes.exifLongitude = [NSNumber numberWithDouble:location.coordinate.longitude];
+
             [resultStrings addObject:[attributes toJSONString]];
         }
 	}

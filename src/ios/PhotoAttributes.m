@@ -24,6 +24,9 @@
         self.originalPhotoHeight = @0;
         self.finalWidth = @0;
         self.finalHeight = @0;
+        self.exifDate = @"";
+        self.exifLatitude = @0;
+        self.exifLongitude = @0;
     }
 
     return self;
@@ -38,6 +41,9 @@
             self.originalPhotoHeight, @"originalPhotoHeight",
             self.finalWidth, @"finalWidth",
             self.finalHeight, @"finalHeight",
+            self.exifDate, @"origExifDate",
+            self.exifLatitude, @"origExifLat",
+            self.exifLongitude, @"origExifLon",
             nil];
 }
 
