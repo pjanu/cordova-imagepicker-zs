@@ -21,5 +21,6 @@
 -(id)initWithFilePath:(NSString *)filePath;
 -(NSDictionary *)toDictionary;
 -(NSString *)toJSONString;
+-(void)swapOriginalDimensions;
 
 @end

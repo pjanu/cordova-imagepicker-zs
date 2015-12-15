@@ -72,7 +72,8 @@
     NSString* filePath;
     ALAsset* asset = nil;
     CGSize targetSize = CGSizeMake(self.width, self.height);
-	for (NSDictionary *dict in info) {
+
+    for (NSDictionary *dict in info) {
         asset = [dict objectForKey:@"ALAsset"];
         // From ELCImagePickerController.m
 
@@ -119,6 +120,11 @@
             attributes.originalPhotoWidth = [NSNumber numberWithInteger:CGImageGetWidth(imgRef)];
             attributes.originalPhotoHeight = [NSNumber numberWithInteger:CGImageGetHeight(imgRef)];
 
+            if([self isPortraitImage:asset])
+            {
+                [attributes swapOriginalDimensions];
+            }
+
             UIImage *largeImage = [images objectForKey:@"largePhotoName"];
             attributes.finalWidth = [NSNumber numberWithInteger:largeImage.size.width];
             attributes.finalHeight = [NSNumber numberWithInteger:largeImage.size.height];
@@ -138,6 +144,11 @@
 
 	[self.viewController dismissViewControllerAnimated:YES completion:nil];
 	[self.commandDelegate sendPluginResult:result callbackId:self.callbackId];
+}
+
+- (bool)isPortraitImage:(ALAsset *)asset {
+    UIImageOrientation orientation = [[asset valueForProperty:ALAssetPropertyOrientation] intValue];
+    return orientation == UIImageOrientationLeft || orientation == UIImageOrientationRight || orientation == UIImageOrientationLeftMirrored || orientation == UIImageOrientationRight;
 }
 
 - (void)elcImagePickerControllerDidCancel:(ELCImagePickerController *)picker {

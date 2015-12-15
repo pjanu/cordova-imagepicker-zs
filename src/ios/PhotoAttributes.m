@@ -54,4 +54,10 @@
     return [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding];
 }
 
+-(void)swapOriginalDimensions {
+    NSNumber *width = self.originalPhotoWidth;
+    self.originalPhotoWidth = self.originalPhotoHeight;
+    self.originalPhotoHeight = width;
+}
+
 @end
