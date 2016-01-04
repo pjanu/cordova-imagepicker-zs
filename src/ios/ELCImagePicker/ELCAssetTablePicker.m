@@ -64,15 +64,23 @@
     self.spinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
     self.spinner.hidesWhenStopped = YES;
     self.spinner.frame = CGRectMake(0.0, 0.0, 60.0, 60.0);
-    CGPoint center = self.view.center;
-    center.y -= self.spinner.frame.size.height * 0.5;
-    [self.spinner setCenter:center];
+    [self.spinner setCenter:self.getWindowCenter];
     [self.spinner setBackgroundColor:[UIColor blackColor]];
-    [self.view addSubview:self.spinner];
+    [self.getMainWindow addSubview:self.spinner];
 }
 
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations {
     return [self.limitedOrientation getMask];
+}
+
+- (CGPoint) getWindowCenter {
+    UIScreen *screen = [UIScreen mainScreen];
+    CGSize size = screen.bounds.size;
+    return CGPointMake(size.width * 0.5, size.height * 0.5);
+}
+
+- (UIWindow *) getMainWindow {
+    return [UIApplication sharedApplication].windows.firstObject;
 }
 
 - (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation

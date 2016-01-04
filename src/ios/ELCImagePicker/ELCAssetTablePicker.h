@@ -35,5 +35,7 @@
 - (void)setTitle:(NSString *)title;
 - (void)updateSelectedCount;
 - (void)doneAction:(id)sender;
+- (CGPoint)getWindowCenter;
+- (UIWindow *)getMainWindow;
 
 @end
