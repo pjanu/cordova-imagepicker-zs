@@ -66,7 +66,7 @@
 
 - (void)elcImagePickerController:(ELCImagePickerController *)picker didFinishPickingMediaWithInfo:(NSArray *)info {
 	CDVPluginResult* result = nil;
-	NSMutableArray *resultStrings = [[NSMutableArray alloc] init];
+    NSMutableArray *addedFiles = [[NSMutableArray alloc] init];
     NSString* docsPath = [NSTemporaryDirectory()stringByStandardizingPath];
     NSFileManager* fileMgr = [[NSFileManager alloc] init];
     NSString* filePath;
@@ -134,16 +134,21 @@
             attributes.exifLatitude = [NSNumber numberWithDouble:location.coordinate.latitude];
             attributes.exifLongitude = [NSNumber numberWithDouble:location.coordinate.longitude];
 
-            [resultStrings addObject:[attributes toJSONString]];
+            [addedFiles addObject:[attributes toJSONString]];
         }
 	}
 
-	if (nil == result) {
-		result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:resultStrings];
-	}
+    if (nil == result) {
+        result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[self formatResult:addedFiles state:@"ok"]];
+    }
 
 	[self.viewController dismissViewControllerAnimated:YES completion:nil];
 	[self.commandDelegate sendPluginResult:result callbackId:self.callbackId];
+}
+
+- (NSDictionary *)formatResult:(NSMutableArray *)files state:(NSString *)resultState {
+    return [NSDictionary dictionaryWithObjectsAndKeys:files, @"addedFiles",
+                         resultState, @"state", nil];
 }
 
 - (bool)isPortraitImage:(ALAsset *)asset {
@@ -154,8 +159,8 @@
 - (void)elcImagePickerControllerDidCancel:(ELCImagePickerController *)picker {
 	[self.viewController dismissViewControllerAnimated:YES completion:nil];
 	CDVPluginResult* pluginResult = nil;
-    NSArray* emptyArray = [NSArray array];
-	pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:emptyArray];
+    NSMutableArray *emptyArray = [NSMutableArray array];
+    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[self formatResult:emptyArray state:@"cancelled"]];
 	[self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackId];
 }
 

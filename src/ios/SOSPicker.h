@@ -18,6 +18,7 @@
 - (UIImage*)imageByScalingNotCroppingForSize:(UIImage*)anImage toSize:(CGSize)frameSize;
 - (UIImage*)resizeToFile:(ALAsset *)asset file:(NSString *)filePath toSize:(CGSize)targetSize;
 - (UIImage *)originalToFile:(ALAsset *)asset file:(NSString *)filePath;
+- (NSDictionary *)formatResult:(NSMutableArray *)files state:(NSString *)resultState;
 - (bool)isPortraitImage:(ALAsset *)asset;
 
 @property (nonatomic, assign) NSInteger width;
