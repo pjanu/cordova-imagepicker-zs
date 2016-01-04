@@ -61,26 +61,11 @@
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
-    self.spinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
-    self.spinner.hidesWhenStopped = YES;
-    self.spinner.frame = CGRectMake(0.0, 0.0, 60.0, 60.0);
-    [self.spinner setCenter:self.getWindowCenter];
-    [self.spinner setBackgroundColor:[UIColor blackColor]];
-    [self.getMainWindow addSubview:self.spinner];
+    self.spinner = [[Spinner alloc] init:UIActivityIndicatorViewStyleWhiteLarge withSize:60.0 withBackgroundColor:[UIColor blackColor]];
 }
 
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations {
     return [self.limitedOrientation getMask];
-}
-
-- (CGPoint) getWindowCenter {
-    UIScreen *screen = [UIScreen mainScreen];
-    CGSize size = screen.bounds.size;
-    return CGPointMake(size.width * 0.5, size.height * 0.5);
-}
-
-- (UIWindow *) getMainWindow {
-    return [UIApplication sharedApplication].windows.firstObject;
 }
 
 - (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
@@ -153,7 +138,7 @@
 
 - (void)doneAction:(id)sender
 {
-    [self spinnerAction:@selector(showSpinner)];
+    [self.spinner show];
     NSMutableArray *selectedAssetsImages = [[NSMutableArray alloc] init];
 	    
 	for (ELCAsset *elcAsset in self.elcAssets) {
@@ -162,21 +147,8 @@
 		}
 	}
     [self.parent selectedAssets:selectedAssetsImages];
-    [self spinnerAction:@selector(hideSpinner)];
+    [self.spinner hide];
 }
-
--(void) spinnerAction:(SEL)method {
-    [NSThread detachNewThreadSelector:method toTarget:self withObject:nil];
-}
-
--(void) showSpinner {
-    [self.spinner startAnimating];
-}
-
--(void) hideSpinner {
-    [self.spinner stopAnimating];
-}
-
 
 - (BOOL)shouldSelectAsset:(ELCAsset *)asset
 {

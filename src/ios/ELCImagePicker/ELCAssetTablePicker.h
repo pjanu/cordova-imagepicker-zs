@@ -13,6 +13,7 @@
 #import "SelectionParameters.h"
 #import "AssetPickerTitleStyle.h"
 #import "InterfaceOrientation.h"
+#import "Spinner.h"
 
 @interface ELCAssetTablePicker : UITableViewController <ELCAssetDelegate>
 
@@ -25,7 +26,7 @@
 @property (nonatomic, strong) SelectionParameters *selection;
 @property (nonatomic, strong) AssetPickerTitleStyle *titleStyle;
 @property (nonatomic, strong) InterfaceOrientation *limitedOrientation;
-@property (nonatomic, strong) UIActivityIndicatorView *spinner;
+@property (nonatomic, strong) Spinner *spinner;
 
 // optional, can be used to filter the assets displayed
 @property(nonatomic, weak) id<ELCAssetPickerFilterDelegate> assetPickerFilterDelegate;
@@ -35,7 +36,5 @@
 - (void)setTitle:(NSString *)title;
 - (void)updateSelectedCount;
 - (void)doneAction:(id)sender;
-- (CGPoint)getWindowCenter;
-- (UIWindow *)getMainWindow;
 
 @end
