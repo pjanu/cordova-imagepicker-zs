@@ -2,7 +2,7 @@
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
   xmlns:android="http://schemas.android.com/apk/res/android"
   id="com.synconset.imagepicker-zetbook"
-  version="1.0.35">
+  version="1.0.36">
 
 	<name>ImagePicker Zetbook</name>
 
@@ -57,6 +57,9 @@
 
 		<header-file src="src/ios/InterfaceOrientation.h" />
 		<source-file src="src/ios/InterfaceOrientation.m" />
+
+		<header-file src="src/ios/Spinner.h" />
+		<source-file src="src/ios/Spinner.m" />
 
 		<header-file src="src/ios/ELCImagePicker/ELCAlbumPickerController.h" />
 		<source-file src="src/ios/ELCImagePicker/ELCAlbumPickerController.m" />
