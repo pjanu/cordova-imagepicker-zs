@@ -11,6 +11,7 @@
 #import "ELCAlbumPickerController.h"
 #import "AssetIdentifier.h"
 #import "LocalizedString.h"
+#import <UIKit/UIKit.h>
 
 @interface ELCAssetTablePicker ()
 
@@ -58,8 +59,13 @@
     self.columns = self.view.bounds.size.width / 80;
 }
 
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    self.spinner = [[Spinner alloc] init:UIActivityIndicatorViewStyleWhiteLarge withSize:60.0 withBackgroundColor:[UIColor blackColor]];
+}
+
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations {
-    return UIInterfaceOrientationMaskLandscape;
+    return [self.limitedOrientation getMask];
 }
 
 - (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
@@ -121,7 +127,9 @@
 }
 
 - (NSString *)getSelectedCountTitle {
-    return [NSString stringWithFormat:[LocalizedString get:@"%d of %d"], self.selection.addPhotoCount + (int) [self totalSelectedAssets], self.selection.maximumPhotoCount];
+    NSString *placeholder = [self.titleStyle getPlaceholderString];
+    NSInteger selected = self.selection.addPhotoCount + (int) [self totalSelectedAssets];
+    return [NSString stringWithFormat:[LocalizedString get:placeholder], selected, self.selection.maximumPhotoCount];
 }
 
 - (void)setTitle:(NSString *)title {
@@ -129,8 +137,9 @@
 }
 
 - (void)doneAction:(id)sender
-{	
-	NSMutableArray *selectedAssetsImages = [[NSMutableArray alloc] init];
+{
+    [self.spinner show];
+    NSMutableArray *selectedAssetsImages = [[NSMutableArray alloc] init];
 	    
 	for (ELCAsset *elcAsset in self.elcAssets) {
 		if ([elcAsset selected]) {
@@ -138,8 +147,8 @@
 		}
 	}
     [self.parent selectedAssets:selectedAssetsImages];
+    [self.spinner hide];
 }
-
 
 - (BOOL)shouldSelectAsset:(ELCAsset *)asset
 {

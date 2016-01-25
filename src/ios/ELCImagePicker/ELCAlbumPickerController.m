@@ -146,13 +146,15 @@
 	ELCAssetTablePicker *picker = [[ELCAssetTablePicker alloc] initWithNibName: nil bundle: nil];
 	picker.parent = self;
     picker.selection = [(id) self.parent getSelection];
+    picker.titleStyle = [(id) self.parent titleStyle];
+    picker.limitedOrientation = [(id) self.parent limitedOrientation];
 
     picker.assetGroup = [self.assetGroups objectAtIndex:indexPath.row];
     [picker.assetGroup setAssetsFilter:[ALAssetsFilter allPhotos]];
     
 	picker.assetPickerFilterDelegate = self.assetPickerFilterDelegate;
 	picker.immediateReturn = self.immediateReturn;
-   picker.singleSelection = self.singleSelection;
+    picker.singleSelection = self.singleSelection;
 	
 	[self.navigationController pushViewController:picker animated:YES];
 }

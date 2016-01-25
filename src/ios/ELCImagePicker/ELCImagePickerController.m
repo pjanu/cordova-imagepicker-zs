@@ -85,7 +85,7 @@
 }
 
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations {
-    return UIInterfaceOrientationMaskLandscape;
+    return [self.limitedOrientation getMask];
 }
 
 - (SelectionParameters *)getSelection {

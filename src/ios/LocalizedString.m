@@ -13,7 +13,8 @@
 
     if(dict == nil)
     {
-        NSDictionary *cs = [NSDictionary dictionaryWithObjectsAndKeys:@"%d z %d", @"%d of %d",
+        NSDictionary *cs = [NSDictionary dictionaryWithObjectsAndKeys:@"Vybráno %d z %d", @"Selected %d of %d",
+                            @"Vybráno %d", @"Selected %d",
                             @"Načítám...", @"Loading...",
                             @"Chyba alba: %@ - %@", @"Album Error: %@ - %@",
                             @"Vyberte album", @"Select an Album",
@@ -25,7 +26,8 @@
                             @"Zrušit", @"Cancel",
                             nil];
 
-        NSDictionary *sk = [NSDictionary dictionaryWithObjectsAndKeys:@"%d z %d", @"%d of %d",
+        NSDictionary *sk = [NSDictionary dictionaryWithObjectsAndKeys:@"Vybráno %d z %d", @"Selected %d of %d",
+                            @"Vybráno %d", @"Selected %d",
                             @"Nahrávam...", @"Loading...",
                             @"Chyba alba: %@ - %@", @"Album Error: %@ - %@",
                             @"Vyberte album", @"Select an Album",

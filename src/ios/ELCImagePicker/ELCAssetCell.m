@@ -7,6 +7,7 @@
 
 #import "ELCAssetCell.h"
 #import "ELCAsset.h"
+#import "ELCAssetTablePicker.h"
 
 @interface ELCAssetCell ()
 
@@ -87,6 +88,7 @@
             asset.selected = !asset.selected;
             UIImageView *overlayView = [_overlayViewArray objectAtIndex:i];
             overlayView.hidden = !asset.selected;
+            [(id) asset.parent updateSelectedCount];
             break;
         }
         frame.origin.x = frame.origin.x + frame.size.width + 4;
