@@ -27,6 +27,7 @@
 @property (nonatomic, strong) AssetPickerTitleStyle *titleStyle;
 @property (nonatomic, strong) InterfaceOrientation *limitedOrientation;
 @property (nonatomic, strong) Spinner *spinner;
+@property (nonatomic, strong) NSMutableDictionary *selectedImages;
 
 // optional, can be used to filter the assets displayed
 @property(nonatomic, weak) id<ELCAssetPickerFilterDelegate> assetPickerFilterDelegate;
@@ -36,5 +37,6 @@
 - (void)setTitle:(NSString *)title;
 - (void)updateSelectedCount;
 - (void)doneAction:(id)sender;
+- (void)backAction;
 
 @end
