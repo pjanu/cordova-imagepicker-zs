@@ -53,14 +53,21 @@
 	[self performSelectorInBackground:@selector(preparePhotos) withObject:nil];
 }
 
+- (int) calculateCountOfColumns
+{
+    return self.view.bounds.size.width / 80;
+}
+
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    self.columns = self.view.bounds.size.width / 80;
+    self.columns = [self calculateCountOfColumns];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
+    self.columns = [self calculateCountOfColumns];
+    [self.tableView reloadData];
     self.spinner = [[Spinner alloc] init:UIActivityIndicatorViewStyleWhiteLarge withSize:60.0 withBackgroundColor:[UIColor blackColor]];
 }
 
@@ -82,7 +89,7 @@
 - (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
 {
     [super didRotateFromInterfaceOrientation:fromInterfaceOrientation];
-    self.columns = self.view.bounds.size.width / 80;
+    self.columns = [self calculateCountOfColumns];
     [self.tableView reloadData];
 }
 
