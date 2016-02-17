@@ -39,9 +39,10 @@
             android:paddingRight="10dp"
             android:paddingLeft="10dp"
             android:drawablePadding="8dp"
-            android:gravity="center_vertical"
-            android:text=""
-            android:textAlignment="center" />
+            android:gravity="center"
+            android:text="0"
+            android:textAlignment="center"
+            android:singleLine="true" />
     </FrameLayout>
 
     <include layout="@layout/actionbar_done_button" />
