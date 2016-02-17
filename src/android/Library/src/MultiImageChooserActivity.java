@@ -1046,6 +1046,20 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                 matrix.setRotate(rotate);
                 return Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
             }
+            
+http://stackoverflow.com/questions/27732781/how-to-write-exif-data-to-image-in-android
+ExifInterface exif = new ExifInterface(exifVar.getAbsolutePath());
+exif.setAttribute("UserComment", mString);
+exif.saveAttributes();
+
+
+exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE,
+String.valueOf(latituteField.toString()));
+
+exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, 
+String.valueOf(longitudeField.toString()));
+
+exif.saveAttributes();
 
             return bmp;
         }
