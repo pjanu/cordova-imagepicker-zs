@@ -979,7 +979,7 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                         jsonObj.put("originalPhotoHeight", originalPhotoHeight);
                         jsonObj.put("finalWidth", finalWidth);
                         jsonObj.put("finalHeight", finalHeight);
-                        jsonObj.put("finalOrientation", orientation);
+                        jsonObj.put("originalRotation", rotate);
                         jsonObj.put("origExifDate", origExifDate);
                         jsonObj.put("origExifLon", origExifLon);
                         jsonObj.put("origExifLat", origExifLat);
