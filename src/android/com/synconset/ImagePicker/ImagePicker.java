@@ -27,6 +27,7 @@ public class ImagePicker extends CordovaPlugin {
 		 this.params = args.getJSONObject(0);
 		if (action.equals("getPictures")) {
 			Intent intent = new Intent(cordova.getActivity(), MultiImageChooserActivity.class);
+
 			int max = 20;
 			int add = 0;
 			int desiredWidth = 0;
@@ -35,7 +36,9 @@ public class ImagePicker extends CordovaPlugin {
 			String selectedFileNames = "";
 			int selectedColor = 0;
 			String orientation = "any";
-			String customization = "";
+			boolean simpleHeader = false;
+			boolean countOkEval = false;
+
 			if (this.params.has("maximumImagesCount")) {
 				max = this.params.getInt("maximumImagesCount");
 			}
@@ -60,8 +63,11 @@ public class ImagePicker extends CordovaPlugin {
 			if (this.params.has("orientation")) {
 				orientation = this.params.getString("orientation");
 			}
-			if (this.params.has("customization")) {
-				customization = this.params.getString("customization");
+			if (this.params.has("simpeHeader")) {
+				simpleHeader = this.params.getBoolean("simpleHeader");
+			}
+			if (this.params.has("countOkEval")) {
+				countOkEval = this.params.getBoolean("countOkEval");
 			}
 			intent.putExtra("SELECTED_COLOR", selectedColor);
 			intent.putExtra("MAX_IMAGES", max);
@@ -71,7 +77,8 @@ public class ImagePicker extends CordovaPlugin {
 			intent.putExtra("QUALITY", quality);
 			intent.putExtra("SELECTED_KEY", selectedFileNames);
 			intent.putExtra("VIEW_ORIENTATION", orientation);
-			intent.putExtra("CUSTOMIZATION", customization);
+			intent.putExtra("SIMPLE_HEADER", simpleHeader);
+			intent.putExtra("COUNTOK_EVAL", countOkEval);
 			if (this.cordova != null) {
 				this.cordova.startActivityForResult((CordovaPlugin) this, intent, 0);
 			}

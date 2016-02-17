@@ -33,14 +33,15 @@
 
         <TextView style="?android:actionBarTabTextStyle"
             android:id="@+id/actionbar_status_textview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
             android:layout_gravity="center"
             android:paddingRight="10dp"
             android:paddingLeft="10dp"
             android:drawablePadding="8dp"
             android:gravity="center_vertical"
-            android:text="" />
+            android:text=""
+            android:textAlignment="center" />
     </FrameLayout>
 
     <include layout="@layout/actionbar_done_button" />

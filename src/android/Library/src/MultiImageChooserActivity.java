@@ -85,6 +85,7 @@ import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
+import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -97,7 +98,6 @@ import android.os.SystemClock;
 
 // import android.Locale;
 import java.util.Locale;
-
 
 public class MultiImageChooserActivity extends Activity implements OnItemClickListener,
         LoaderManager.LoaderCallbacks<Cursor> {
@@ -112,6 +112,8 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
     public static final String ADD_IMAGES = "ADD_IMAGES";
     public static final String SELECTED_COLOR_KEY = "SELECTED_COLOR";
     public static final String VIEW_ORIENTATION = "VIEW_ORIENTATION";
+    public static final String SIMPLE_HEADER_KEY = "SIMPLE_HEADER";
+    public static final String COUNTOK_EVAL_KEY = "COUNTOK_EVAL";
 
     private ImageAdapter ia;
 
@@ -150,6 +152,8 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
     private String alreadySelectedFileNames = "";
     private String viewOrientation = "any";
 
+    private boolean simpleHeader = false;
+    private boolean countOkEval = false;
 
     private String selectedLang = "en";
 
@@ -216,6 +220,8 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
         alreadySelectedFileNames = getIntent().getStringExtra(SELECTED_KEY);
         addImagesCount = getIntent().getIntExtra(ADD_IMAGES, 0);
         maxImageCount = maxImages;
+        countOkEval = getIntent().getBooleanExtra(COUNTOK_EVAL_KEY, false);
+        simpleHeader = getIntent().getBooleanExtra(SIMPLE_HEADER_KEY, false);
 
         Display display = getWindowManager().getDefaultDisplay();
         int width = display.getWidth();
@@ -272,7 +278,7 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
         updateAcceptButton();
         int count = addImagesCount + fileNames.size();
         int maxCount = addImagesCount + maxImageCount;
-        updateHeaderText(strChosen + " " + count + " " + strOf + " " + maxCount + "");
+        updateHeaderText(simpleHeader, countOkEval, strChosen, count, strOf, maxCount);
         progress = new ProgressDialog(this);
         progress.setTitle(strProcessing);
         progress.setMessage(strProcessingNote);
@@ -347,7 +353,7 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
         updateAcceptButton();
         int count = addImagesCount + fileNames.size();
         int maxCount = addImagesCount + maxImageCount;
-        updateHeaderText(strChosen + " " + count + " " + strOf + " " + maxCount + "");
+        updateHeaderText(simpleHeader, countOkEval, strChosen, count, strOf, maxCount);
     }
 
     @Override
@@ -454,9 +460,24 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
         getActionBar().getCustomView().findViewById(fakeR.getId("id", "actionbar_done")).setEnabled(enabled);
     }
 
-    private void updateHeaderText(String text) {
-        ((TextView) getActionBar().getCustomView().findViewById(fakeR.getId("id", "actionbar_status_textview")))
-                .setText(text);
+    private void updateHeaderText(boolean simpleHeader, boolean countOkEval, String strChosen, int count, String strOf, int maxCount) {
+        String text;
+        TextView tv =((TextView) getActionBar().getCustomView().findViewById(fakeR.getId("id", "actionbar_status_textview")));
+        if(simpleHeader){
+            text = "" + count;
+        }
+        else {
+            text = strChosen + " " + count + " " + strOf + " " + maxCount + "";
+        }
+        if(countOkEval){
+            if(count >= 12 && count <= 60 && count % 4 == 0){
+                tv.setBackgroundColor(0xe600cc33);
+            }
+            else {
+                tv.setBackgroundColor(0x00ffffff);
+            }
+        }
+        tv.setText(text);
     }
 
     private void setupHeader() {
@@ -1046,20 +1067,6 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                 matrix.setRotate(rotate);
                 return Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
             }
-            
-http://stackoverflow.com/questions/27732781/how-to-write-exif-data-to-image-in-android
-ExifInterface exif = new ExifInterface(exifVar.getAbsolutePath());
-exif.setAttribute("UserComment", mString);
-exif.saveAttributes();
-
-
-exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE,
-String.valueOf(latituteField.toString()));
-
-exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, 
-String.valueOf(longitudeField.toString()));
-
-exif.saveAttributes();
 
             return bmp;
         }
