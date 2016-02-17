@@ -35,6 +35,19 @@
 	self.height = [[options objectForKey:@"height"] integerValue];
 	self.quality = [[options objectForKey:@"quality"] integerValue];
 
+    self.library = [[ALAssetsLibrary alloc] init];
+
+    NSMutableDictionary *selectedImages = [[NSMutableDictionary alloc] init];
+    for (NSString *identifier in selected) {
+        if ([identifier isEqualToString:@""]) {
+            continue;
+        }
+
+        [self.library assetForURL:[NSURL URLWithString:identifier] resultBlock:^(ALAsset *asset) {
+            selectedImages[identifier] = asset;
+        } failureBlock:^(NSError *error){}];
+    }
+
 	// Create the an album controller and image picker
 	ELCAlbumPickerController *albumController = [[ELCAlbumPickerController alloc] init];
 
@@ -55,7 +68,9 @@
     imagePicker.returnsOriginalImage = 1;
     imagePicker.imagePickerDelegate = self;
 
-   albumController.parent = imagePicker;
+    albumController.selectedImages = selectedImages;
+    albumController.library = self.library;
+    albumController.parent = imagePicker;
 	self.callbackId = command.callbackId;
 	// Present modally
 	[self.viewController presentViewController:imagePicker

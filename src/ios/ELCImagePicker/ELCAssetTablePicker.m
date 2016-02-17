@@ -53,15 +53,33 @@
 	[self performSelectorInBackground:@selector(preparePhotos) withObject:nil];
 }
 
+- (int) calculateCountOfColumns
+{
+    return self.view.bounds.size.width / 80;
+}
+
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    self.columns = self.view.bounds.size.width / 80;
+    self.columns = [self calculateCountOfColumns];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
+    self.columns = [self calculateCountOfColumns];
+    [self.tableView reloadData];
     self.spinner = [[Spinner alloc] init:UIActivityIndicatorViewStyleWhiteLarge withSize:60.0 withBackgroundColor:[UIColor blackColor]];
+}
+
+- (void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+
+    if (![[self.navigationController viewControllers] containsObject:self]) {
+        // We were removed from the navigation controller's view controller stack
+        // thus, we can infer that the back button was pressed
+        [self backAction];
+    }
 }
 
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations {
@@ -71,7 +89,7 @@
 - (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
 {
     [super didRotateFromInterfaceOrientation:fromInterfaceOrientation];
-    self.columns = self.view.bounds.size.width / 80;
+    self.columns = [self calculateCountOfColumns];
     [self.tableView reloadData];
 }
 
@@ -99,7 +117,8 @@
                 [self.elcAssets addObject:elcAsset];
             }
 
-            BOOL isSelected = [self.selection.selected containsObject:[[AssetIdentifier alloc] initWithAsset:result].url];
+            NSString *identifier = [[AssetIdentifier alloc] initWithAsset:result].url;
+            BOOL isSelected = [[self.selectedImages allKeys] containsObject:identifier];
             [elcAsset setSelected:isSelected];
          }];
 
@@ -136,17 +155,65 @@
     [self.navigationItem setTitle:title];
 }
 
+- (NSInteger)findAsset:(NSMutableArray *)selectedAssetsImages withIdentifier:(NSString *)identifier
+{
+    NSInteger index = 0;
+    for (ALAsset *asset in selectedAssetsImages) {
+        if ([identifier isEqualToString:[[AssetIdentifier alloc] initWithAsset:asset].url]) {
+            break;
+        }
+        index++;
+    }
+    return index;
+}
+
+- (NSMutableArray *)getSelectedImages
+{
+    NSMutableArray *selectedAssetsImages = [[NSMutableArray alloc] initWithArray:[self.selectedImages allValues]];
+
+    for (ELCAsset *elcAsset in self.elcAssets) {
+        ALAsset *asset = [elcAsset asset];
+        NSString *identifier = [[AssetIdentifier alloc] initWithAsset:asset].url;
+        BOOL isSelected = [elcAsset selected];
+        BOOL alreadySelected = [[self.selectedImages allKeys] containsObject:identifier];
+
+        if (isSelected && !alreadySelected) {
+            [selectedAssetsImages addObject:asset];
+        }
+        else if(!isSelected && alreadySelected) {
+            NSInteger index = [self findAsset:selectedAssetsImages withIdentifier:identifier];
+            [selectedAssetsImages removeObjectAtIndex:index];
+        }
+    }
+
+    return selectedAssetsImages;
+}
+
+- (NSMutableDictionary *)getSelectedImagesMap
+{
+    NSMutableDictionary *selectedImages = [[NSMutableDictionary alloc] init];
+
+    for (ALAsset *asset in [self getSelectedImages]) {
+        NSString *identifier = [[[AssetIdentifier alloc] initWithAsset:asset] url];
+        selectedImages[identifier] = asset;
+    }
+
+    return selectedImages;
+}
+
+- (void)backAction
+{
+    NSMutableDictionary *map = [self getSelectedImagesMap];
+    [self.selectedImages removeAllObjects];
+    for (NSString *identifier in map) {
+        self.selectedImages[identifier] = [map objectForKey:identifier];
+    }
+}
+
 - (void)doneAction:(id)sender
 {
     [self.spinner show];
-    NSMutableArray *selectedAssetsImages = [[NSMutableArray alloc] init];
-	    
-	for (ELCAsset *elcAsset in self.elcAssets) {
-		if ([elcAsset selected]) {
-			[selectedAssetsImages addObject:[elcAsset asset]];
-		}
-	}
-    [self.parent selectedAssets:selectedAssetsImages];
+    [self.parent selectedAssets:[self getSelectedImages]];
     [self.spinner hide];
 }
 
@@ -227,12 +294,17 @@
 
 - (int)totalSelectedAssets
 {
-    int count = 0;
+    NSArray *selected = [[self selectedImages] allKeys];
+    int count = [selected count];
     
     for (ELCAsset *asset in self.elcAssets) {
-		if (asset.selected) {
-            count++;	
+        NSString *identifier = [[AssetIdentifier alloc] initWithAsset:[asset asset]].url;
+		if (!asset.selected && [selected containsObject:identifier]) {
+            count--;
 		}
+        else if (asset.selected && ![selected containsObject:identifier]) {
+            count++;
+        }
 	}
     
     return count;

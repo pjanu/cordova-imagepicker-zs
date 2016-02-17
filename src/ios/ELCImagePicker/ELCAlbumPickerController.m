@@ -12,8 +12,6 @@
 
 @interface ELCAlbumPickerController ()
 
-@property (nonatomic, strong) ALAssetsLibrary *library;
-
 @end
 
 @implementation ELCAlbumPickerController
@@ -34,9 +32,6 @@
 
     NSMutableArray *tempArray = [[NSMutableArray alloc] init];
 	self.assetGroups = tempArray;
-    
-    ALAssetsLibrary *assetLibrary = [[ALAssetsLibrary alloc] init];
-    self.library = assetLibrary;
 
     // Load Albums into assetGroups
     dispatch_async(dispatch_get_main_queue(), ^
@@ -148,6 +143,7 @@
     picker.selection = [(id) self.parent getSelection];
     picker.titleStyle = [(id) self.parent titleStyle];
     picker.limitedOrientation = [(id) self.parent limitedOrientation];
+    picker.selectedImages = self.selectedImages;
 
     picker.assetGroup = [self.assetGroups objectAtIndex:indexPath.row];
     [picker.assetGroup setAssetsFilter:[ALAssetsFilter allPhotos]];

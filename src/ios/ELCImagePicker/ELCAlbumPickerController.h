@@ -16,6 +16,8 @@
 @property (nonatomic, strong) NSMutableArray *assetGroups;
 @property (nonatomic, assign) BOOL singleSelection;
 @property (nonatomic, assign) BOOL immediateReturn;
+@property (nonatomic, strong) NSMutableDictionary *selectedImages;
+@property (nonatomic, strong) ALAssetsLibrary *library;
 
 // optional, can be used to filter the assets displayed
 @property (nonatomic, weak) id<ELCAssetPickerFilterDelegate> assetPickerFilterDelegate;
