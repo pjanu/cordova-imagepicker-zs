@@ -713,6 +713,7 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
 
                     File tmpFile;
 
+
                     BitmapFactory.Options options = new BitmapFactory.Options();
                     options.inSampleSize = 1;
                     options.inJustDecodeBounds = true;
@@ -737,7 +738,7 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                     }
 
                     // Recosntruct rotation
-                    boolean rotationSuccess = false;
+//                    boolean rotationSuccess = false;
                     int rotate = 0;
                     if(orientation == ExifInterface.ORIENTATION_ROTATE_90)
                     {
@@ -759,7 +760,7 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                     String largePhotoName = null;
                     String thumbnailName = null;
                     String miniPhotoName = null;
-
+                    String originalPhotoName = Uri.fromFile(originalFile).toString();
 
                     Log.d("ZETBOOK", "parsing file " + imageSequence + " of " + imagesCount + " (" + originalFile + ")");
 
@@ -804,8 +805,8 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                         bmp = tryToScaleBitmapToPhoto(bmp);
 
                         // rotate if needed
-                        bmp = tryToRotateBitmap(bmp, rotate);
-                        rotationSuccess = true;
+//                        bmp = tryToRotateBitmap(bmp, rotate);
+//                        rotationSuccess = true;
 
                         // store file
                         tmpFile = storeImage(bmp, originalFileName);
@@ -822,6 +823,11 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                         // reset bmp
                         bmp = null;
                     }
+
+                    // set same exif orientaton ans source
+//                    if(!rotationSuccess) {
+                        tmpFile = setExifOrientation(tmpFile, orientation);
+//                    }
 
                     largePhotoName = Uri.fromFile(tmpFile).toString();
 
@@ -849,7 +855,7 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                             bmp = tryToScaleBitmapToThumbnail(bmp);
 
                             // rotate if needed
-                            bmp = tryToRotateBitmap(bmp, rotate);
+//                            bmp = tryToRotateBitmap(bmp, rotate);
 
                         }
                         else { // bitmap already exists
@@ -859,8 +865,6 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                             // only scale to 300x300
                             bmp = tryToScaleBitmapToThumbnail(bmp);
                         }
-
-
 
                         // store file
                         tmpFile = storeImage(bmp, originalFileName);
@@ -877,6 +881,11 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                         // reset bmp
                         bmp = null;
                     }
+
+                    // set same exif orientaton ans source
+//                    if(!rotationSuccess) {
+                        tmpFile = setExifOrientation(tmpFile, orientation);
+//                    }
 
                     thumbnailName = Uri.fromFile(tmpFile).toString();
 
@@ -905,8 +914,7 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                             bmp = tryToScaleBitmapToMini(bmp);
 
                             // rotate if needed
-                            bmp = tryToRotateBitmap(bmp, rotate);
-
+//                            bmp = tryToRotateBitmap(bmp, rotate);
                         }
                         else { // bitmap already exists
 
@@ -932,16 +940,21 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                         bmp = null;
                     }
 
+                    // set same exif orientaton ans source
+//                    if(!rotationSuccess) {
+                        tmpFile = setExifOrientation(tmpFile, orientation);
+//                    }
+
                     miniPhotoName = Uri.fromFile(tmpFile).toString();
 
 
-                    // rotation success
-                    if(rotationSuccess) {
-                        orientation = ExifInterface.ORIENTATION_NORMAL;
-                    }
-                    // rotation failed
-                    else {
-                        /*
+//                    // rotation success
+//                    if(rotationSuccess) {
+//                        orientation = ExifInterface.ORIENTATION_NORMAL;
+//                    }
+//                    // rotation failed
+//                    else {
+                        // Change proportions since orientation is +-90deg what means the browser shows photo rotated and w and h must be switched
                         if(orientation == ExifInterface.ORIENTATION_ROTATE_90 || orientation == ExifInterface.ORIENTATION_ROTATE_270) {
 
                             int tmpSize = originalPhotoWidth;
@@ -952,14 +965,13 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                             finalWidth = finalHeight;
                             finalHeight = tmpSize;
                         }
-                        */
-                    }
-
+//                    }
 
                     // returning json object serialized
                     JSONObject jsonObj = new JSONObject();
                     try {
                         jsonObj.put("originalFilePath", originalFilePath);
+                        jsonObj.put("originalPhotoName", originalPhotoName);
                         jsonObj.put("largePhotoName", largePhotoName);
                         jsonObj.put("thumbnailName", thumbnailName);
                         jsonObj.put("miniPhotoName", miniPhotoName);
@@ -972,7 +984,7 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                         jsonObj.put("origExifLon", origExifLon);
                         jsonObj.put("origExifLat", origExifLat);
 
-                        Log.d("ZJSON", jsonObj.toString());
+                        Log.d("ZETBOOK", jsonObj.toString());
                     }
                     catch (JSONException e) {
                         Log.d("ZETBOOK", "** json serializing problem: " + e + " (file " + originalFileName + ")");
@@ -1055,6 +1067,21 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
             return bmp;
         }
 
+        private File setExifOrientation(File file, int orientation) {
+
+            Log.d("ZETBOOK", "** setting orientation to " + orientation);
+
+            try {
+                ExifInterface exif = new ExifInterface(file.getAbsolutePath());
+                exif.setAttribute(ExifInterface.TAG_ORIENTATION, "" + orientation);
+                exif.saveAttributes();
+            } catch(Exception exception) {
+                Log.d("ZETBOOK", "** setting orientation failed");
+            }
+
+            return file;
+        }
+
         private Bitmap tryToRotateBitmap(Bitmap bmp, int rotate) {
 
             if(rotate != 0 && rotate != 90 && rotate != 180 && rotate != 270) {
@@ -1071,11 +1098,7 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
             return bmp;
         }
 
-
         private Bitmap tryToScaleBitmapToPhoto(Bitmap bmp) {
-
-
-
 
             int width = bmp.getWidth(),
                 height = bmp.getHeight(),

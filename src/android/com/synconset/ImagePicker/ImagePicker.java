@@ -63,7 +63,7 @@ public class ImagePicker extends CordovaPlugin {
 			if (this.params.has("orientation")) {
 				orientation = this.params.getString("orientation");
 			}
-			if (this.params.has("simpeHeader")) {
+			if (this.params.has("simpleHeader")) {
 				simpleHeader = this.params.getBoolean("simpleHeader");
 			}
 			if (this.params.has("countOkEval")) {
