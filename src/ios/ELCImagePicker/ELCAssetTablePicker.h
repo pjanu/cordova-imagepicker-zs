@@ -28,6 +28,9 @@
 @property (nonatomic, strong) InterfaceOrientation *limitedOrientation;
 @property (nonatomic, strong) Spinner *spinner;
 @property (nonatomic, strong) NSMutableDictionary *selectedImages;
+@property (nonatomic, strong) UILabel *titleView;
+@property (nonatomic, assign) BOOL simpleHeader;
+@property (nonatomic, assign) BOOL countOkEval;
 
 // optional, can be used to filter the assets displayed
 @property(nonatomic, weak) id<ELCAssetPickerFilterDelegate> assetPickerFilterDelegate;
@@ -36,6 +39,8 @@
 - (void)preparePhotos;
 - (void)setTitle:(NSString *)title;
 - (void)updateSelectedCount;
+- (void)updateTitleView;
+- (NSInteger)getCountOfSelectedPhotos;
 - (void)doneAction:(id)sender;
 - (void)backAction;
 

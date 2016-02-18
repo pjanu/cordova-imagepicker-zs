@@ -31,11 +31,17 @@
     NSArray *selected = [[options objectForKey:@"selected"] componentsSeparatedByString:@";"];
     NSString *titleStyle = [options objectForKey:@"titleStyle"];
     NSString *orientation = [options objectForKey:@"orientation"];
+    BOOL simpleHeader = [[options objectForKey:@"simpleHeader"] boolValue];
+    BOOL countOkEval = [[options objectForKey:@"countOkEval"] boolValue];
 	self.width = [[options objectForKey:@"width"] integerValue];
 	self.height = [[options objectForKey:@"height"] integerValue];
 	self.quality = [[options objectForKey:@"quality"] integerValue];
 
     self.library = [[ALAssetsLibrary alloc] init];
+
+    if (simpleHeader) {
+        titleStyle = @"numberOnly";
+    }
 
     NSMutableDictionary *selectedImages = [[NSMutableDictionary alloc] init];
     for (NSString *identifier in selected) {
@@ -67,6 +73,8 @@
     imagePicker.selected = selected;
     imagePicker.returnsOriginalImage = 1;
     imagePicker.imagePickerDelegate = self;
+    imagePicker.simpleHeader = simpleHeader;
+    imagePicker.countOkEval = countOkEval;
 
     albumController.selectedImages = selectedImages;
     albumController.library = self.library;

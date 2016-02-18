@@ -154,6 +154,9 @@
 	picker.assetPickerFilterDelegate = self.assetPickerFilterDelegate;
 	picker.immediateReturn = self.immediateReturn;
     picker.singleSelection = self.singleSelection;
+
+    picker.simpleHeader = [(id) self.parent simpleHeader];
+    picker.countOkEval = [(id) self.parent countOkEval];
 	
 	[self.navigationController pushViewController:picker animated:YES];
 }

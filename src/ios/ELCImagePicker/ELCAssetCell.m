@@ -89,6 +89,7 @@
             UIImageView *overlayView = [_overlayViewArray objectAtIndex:i];
             overlayView.hidden = !asset.selected;
             [(id) asset.parent updateSelectedCount];
+            [(id) asset.parent updateTitleView];
             break;
         }
         frame.origin.x = frame.origin.x + frame.size.width + 4;
