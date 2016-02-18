@@ -30,6 +30,9 @@
     UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithTitle:[LocalizedString get:@"Cancel"] style:UIBarButtonItemStyleDone target:self.parent action:@selector(cancelImagePicker)];
     [self.navigationItem setRightBarButtonItem:cancelButton];
 
+    UIBarButtonItem *backButton = [[UIBarButtonItem alloc] initWithTitle:[LocalizedString get:@"Back"] style:UIBarButtonItemStyleBordered target:nil action:nil];
+    [self.navigationItem setBackBarButtonItem:backButton];
+
     NSMutableArray *tempArray = [[NSMutableArray alloc] init];
 	self.assetGroups = tempArray;
 

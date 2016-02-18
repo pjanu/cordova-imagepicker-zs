@@ -24,6 +24,7 @@
                             @"Okay", @"Okay",
                             @"Hotovo", @"Done",
                             @"Zrušit", @"Cancel",
+                            @"Zpět", @"Back",
                             nil];
 
         NSDictionary *sk = [NSDictionary dictionaryWithObjectsAndKeys:@"Vybráno %d z %d", @"Selected %d of %d",
@@ -37,6 +38,7 @@
                             @"Okay", @"Okay",
                             @"Hotovo", @"Done",
                             @"Zrušiť", @"Cancel",
+                            @"Späť", @"Back",
                             nil];
 
         dict = [NSDictionary dictionaryWithObjectsAndKeys:cs, @"cs", sk, @"sk", nil];
