@@ -13,6 +13,7 @@
 @property NSNumber *finalWidth;
 @property NSNumber *finalHeight;
 @property NSString *originalFilePath;
+@property NSString *originalPhotoName;
 @property NSString *exifDate;
 @property NSNumber *exifLatitude;
 @property NSNumber *exifLongitude;

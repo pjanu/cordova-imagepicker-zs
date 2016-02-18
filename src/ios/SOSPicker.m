@@ -96,7 +96,11 @@
 
             PhotoAttributes *attributes = [[PhotoAttributes alloc] init];
 
-            NSDictionary *resizes = [NSDictionary dictionaryWithObjectsAndKeys:[PhotoResize resizeWithCGSize:targetSize], @"largePhotoName",
+            ALAssetRepresentation *assetRep = [asset defaultRepresentation];
+            CGSize originalSize = [assetRep dimensions];
+
+            NSDictionary *resizes = [NSDictionary dictionaryWithObjectsAndKeys:[PhotoResize resizeWithCGSize:originalSize], @"originalPhotoName",
+                                            [PhotoResize resizeWithCGSize:targetSize], @"largePhotoName",
                                             [PhotoResize resizeForThumbnail], @"thumbnailName",
                                             [PhotoResize resizeForMini], @"miniPhotoName",
                                             nil];
@@ -128,12 +132,9 @@
                 }
             }
 
-            ALAssetRepresentation *assetRep = [asset defaultRepresentation];
-            CGImageRef imgRef = [assetRep fullResolutionImage];
-
             attributes.originalFilePath = [[AssetIdentifier alloc] initWithAsset:asset].url;
-            attributes.originalPhotoWidth = [NSNumber numberWithInteger:CGImageGetWidth(imgRef)];
-            attributes.originalPhotoHeight = [NSNumber numberWithInteger:CGImageGetHeight(imgRef)];
+            attributes.originalPhotoWidth = [NSNumber numberWithFloat:originalSize.width];
+            attributes.originalPhotoHeight = [NSNumber numberWithFloat:originalSize.height];
 
             if([self isPortraitImage:asset])
             {
