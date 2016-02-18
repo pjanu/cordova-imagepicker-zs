@@ -32,6 +32,7 @@
 @property (nonatomic, assign) BOOL simpleHeader;
 @property (nonatomic, assign) BOOL countOkEval;
 @property (nonatomic, strong) UIColor *overlayColor;
+@property (nonatomic, assign) int cellWidth;
 
 // optional, can be used to filter the assets displayed
 @property(nonatomic, weak) id<ELCAssetPickerFilterDelegate> assetPickerFilterDelegate;

@@ -14,6 +14,7 @@
 @property (nonatomic, strong) NSArray *rowAssets;
 @property (nonatomic, strong) NSMutableArray *imageViewArray;
 @property (nonatomic, strong) NSMutableArray *overlayViewArray;
+@property (nonatomic, assign) int padding;
 
 @end
 
@@ -33,12 +34,15 @@
         
         NSMutableArray *overlayArray = [[NSMutableArray alloc] initWithCapacity:4];
         self.overlayViewArray = overlayArray;
+
+        self.padding = 4;
 	}
 	return self;
 }
 
 - (void)setAssets:(NSArray *)assets
 {
+    int size = [self getCellSize];
     self.rowAssets = assets;
 	for (UIImageView *view in _imageViewArray) {
         [view removeFromSuperview];
@@ -63,7 +67,7 @@
             UIView *overlayView = [_overlayViewArray objectAtIndex:i];
             overlayView.hidden = asset.selected ? NO : YES;
         } else {
-            UIView *overlayView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 75, 75)];
+            UIView *overlayView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, size, size)];
             UIColor *overlayColor = [[(id) asset.parent overlayColor] colorWithAlphaComponent:0.75f];
             [overlayView setBackgroundColor:overlayColor];
             [_overlayViewArray addObject:overlayView];
@@ -74,11 +78,12 @@
 
 - (void)cellTapped:(UITapGestureRecognizer *)tapRecognizer
 {
+    int size = [self getCellSize];
     CGPoint point = [tapRecognizer locationInView:self];
-    CGFloat totalWidth = self.rowAssets.count * 75 + (self.rowAssets.count - 1) * 4;
+    CGFloat totalWidth = self.rowAssets.count * size + (self.rowAssets.count - 1) * self.padding;
     CGFloat startX = (self.bounds.size.width - totalWidth) / 2;
     
-	CGRect frame = CGRectMake(startX, 2, 75, 75);
+	CGRect frame = CGRectMake(startX, self.padding / 2, size, size);
 	
 	for (int i = 0; i < [_rowAssets count]; ++i) {
         if (CGRectContainsPoint(frame, point)) {
@@ -90,16 +95,17 @@
             [(id) asset.parent updateTitleView];
             break;
         }
-        frame.origin.x = frame.origin.x + frame.size.width + 4;
+        frame.origin.x = frame.origin.x + frame.size.width + self.padding;
     }
 }
 
 - (void)layoutSubviews
-{    
-    CGFloat totalWidth = self.rowAssets.count * 75 + (self.rowAssets.count - 1) * 4;
+{
+    int size = [self getCellSize];
+    CGFloat totalWidth = self.rowAssets.count * size + (self.rowAssets.count - 1) * self.padding;
     CGFloat startX = (self.bounds.size.width - totalWidth) / 2;
     
-	CGRect frame = CGRectMake(startX, 2, 75, 75);
+	CGRect frame = CGRectMake(startX, self.padding / 2, size, size);
 	
 	for (int i = 0; i < [_rowAssets count]; ++i) {
 		UIImageView *imageView = [_imageViewArray objectAtIndex:i];
@@ -110,8 +116,12 @@
         [overlayView setFrame:frame];
         [self addSubview:overlayView];
 		
-		frame.origin.x = frame.origin.x + frame.size.width + 4;
+		frame.origin.x = frame.origin.x + frame.size.width + self.padding;
 	}
+}
+
+- (int)getCellSize {
+    return self.width - self.padding;
 }
 
 

@@ -37,7 +37,9 @@
 - (void)viewDidLoad
 {
     [self.tableView setSeparatorStyle:UITableViewCellSeparatorStyleNone];
-	[self.tableView setAllowsSelection:NO];
+    [self.tableView setAllowsSelection:NO];
+
+    self.cellWidth = [self calculateWidthOfCell];
 
     self.titleView = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, self.simpleHeader ? 30 : self.view.bounds.size.width, 30)];
     [self.titleView setBackgroundColor:[self getTitleViewBackground]];
@@ -45,7 +47,7 @@
 
     NSMutableArray *tempArray = [[NSMutableArray alloc] init];
     self.elcAssets = tempArray;
-	
+
     if (self.immediateReturn) {
         
     } else {
@@ -61,7 +63,12 @@
 
 - (int) calculateCountOfColumns
 {
-    return self.view.bounds.size.width / 80;
+    return self.view.bounds.size.width / self.cellWidth;
+}
+
+- (int) calculateWidthOfCell
+{
+    return ceil([UIScreen mainScreen].bounds.size.width * 0.25);
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -301,6 +308,7 @@
 
     if (cell == nil) {		        
         cell = [[ELCAssetCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
+        cell.width = self.cellWidth;
     }
     
     [cell setAssets:[self assetsForIndexPath:indexPath]];
@@ -310,13 +318,13 @@
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-	return 79;
+	return self.cellWidth;
 }
 
 - (int)totalSelectedAssets
 {
     NSArray *selected = [[self selectedImages] allKeys];
-    int count = [selected count];
+    int count = (int) [selected count];
     
     for (ELCAsset *asset in self.elcAssets) {
         NSString *identifier = [[AssetIdentifier alloc] initWithAsset:[asset asset]].url;
