@@ -46,8 +46,7 @@
     for (UIImageView *view in _overlayViewArray) {
         [view removeFromSuperview];
 	}
-    //set up a pointer here so we don't keep calling [UIImage imageNamed:] if creating overlays
-    UIImage *overlayImage = nil;
+
     for (int i = 0; i < [_rowAssets count]; ++i) {
 
         ELCAsset *asset = [_rowAssets objectAtIndex:i];
@@ -61,13 +60,12 @@
         }
         
         if (i < [_overlayViewArray count]) {
-            UIImageView *overlayView = [_overlayViewArray objectAtIndex:i];
+            UIView *overlayView = [_overlayViewArray objectAtIndex:i];
             overlayView.hidden = asset.selected ? NO : YES;
         } else {
-            if (overlayImage == nil) {
-                overlayImage = [UIImage imageNamed:@"Overlay.png"];
-            }
-            UIImageView *overlayView = [[UIImageView alloc] initWithImage:overlayImage];
+            UIView *overlayView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 75, 75)];
+            UIColor *overlayColor = [[(id) asset.parent overlayColor] colorWithAlphaComponent:0.75f];
+            [overlayView setBackgroundColor:overlayColor];
             [_overlayViewArray addObject:overlayView];
             overlayView.hidden = asset.selected ? NO : YES;
         }

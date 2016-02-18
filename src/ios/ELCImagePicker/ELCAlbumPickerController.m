@@ -147,6 +147,7 @@
     picker.titleStyle = [(id) self.parent titleStyle];
     picker.limitedOrientation = [(id) self.parent limitedOrientation];
     picker.selectedImages = self.selectedImages;
+    picker.overlayColor = [(id) self.parent overlayColor];
 
     picker.assetGroup = [self.assetGroups objectAtIndex:indexPath.row];
     [picker.assetGroup setAssetsFilter:[ALAssetsFilter allPhotos]];

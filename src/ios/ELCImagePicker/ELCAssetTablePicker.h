@@ -31,6 +31,7 @@
 @property (nonatomic, strong) UILabel *titleView;
 @property (nonatomic, assign) BOOL simpleHeader;
 @property (nonatomic, assign) BOOL countOkEval;
+@property (nonatomic, strong) UIColor *overlayColor;
 
 // optional, can be used to filter the assets displayed
 @property(nonatomic, weak) id<ELCAssetPickerFilterDelegate> assetPickerFilterDelegate;

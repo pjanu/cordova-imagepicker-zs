@@ -28,6 +28,7 @@
 
     NSInteger maximumImagesCount = [[options objectForKey:@"maximumImagesCount"] integerValue];
     NSInteger addImagesCount = [[options objectForKey:@"addImagesCount"] integerValue];
+    NSInteger selectedColor = [[options objectForKey:@"selectedColor"] integerValue];
     NSArray *selected = [[options objectForKey:@"selected"] componentsSeparatedByString:@";"];
     NSString *titleStyle = [options objectForKey:@"titleStyle"];
     NSString *orientation = [options objectForKey:@"orientation"];
@@ -75,6 +76,7 @@
     imagePicker.imagePickerDelegate = self;
     imagePicker.simpleHeader = simpleHeader;
     imagePicker.countOkEval = countOkEval;
+    imagePicker.overlayColor = [self colorFromNumber:selectedColor];
 
     albumController.selectedImages = selectedImages;
     albumController.library = self.library;
@@ -186,6 +188,14 @@
     NSMutableArray *emptyArray = [NSMutableArray array];
     pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[self formatResult:emptyArray state:@"cancelled"]];
 	[self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackId];
+}
+
+- (UIColor *)colorFromNumber:(NSInteger)color {
+    Byte alpha = (color & 0xFF000000) >> 24;
+    Byte red = (color & 0x00FF0000) >> 16;
+    Byte green = (color & 0x0000FF00) >> 8;
+    Byte blue = (color & 0x000000FF) >> 0;
+    return [UIColor colorWithRed:red/255.0 green:green/255.0 blue:blue/255.0 alpha:alpha/255.0];
 }
 
 - (NSString *)getFilePath:(NSFileManager *)fileMgr inDir:(NSString *)directory size:(CGSize)size {

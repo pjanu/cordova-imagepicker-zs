@@ -20,6 +20,7 @@
 - (UIImage *)originalToFile:(ALAsset *)asset file:(NSString *)filePath;
 - (NSDictionary *)formatResult:(NSMutableArray *)files state:(NSString *)resultState;
 - (bool)isPortraitImage:(ALAsset *)asset;
+- (UIColor*)colorFromNumber:(NSInteger)color;
 
 @property (nonatomic, assign) NSInteger width;
 @property (nonatomic, assign) NSInteger height;
