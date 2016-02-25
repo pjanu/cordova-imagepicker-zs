@@ -88,7 +88,7 @@
                             @"%d", @"%d",
                             nil];
 
-        dict = [NSDictionary dictionaryWithObjectsAndKeys:cs, @"cs", sk, @"sk", de, @"de", pl, @"pl", hu, "@hu", nil];
+        dict = [NSDictionary dictionaryWithObjectsAndKeys:cs, @"cs", sk, @"sk", de, @"de", pl, @"pl", hu, @"hu", nil];
     }
 
     return [dict objectForKey:locale];
