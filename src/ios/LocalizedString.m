@@ -43,7 +43,52 @@
                             @"%d", @"%d",
                             nil];
 
-        dict = [NSDictionary dictionaryWithObjectsAndKeys:cs, @"cs", sk, @"sk", nil];
+        NSDictionary *de = [NSDictionary dictionaryWithObjectsAndKeys:@"%d von %d ausgewählt", @"Selected %d of %d",
+                            @"%d ausgewählt", @"Selected %d",
+                            @"Wird geladen...", @"Loading...",
+                            @"Album-Fehler: %@ - %@", @"Album Error: %@ - %@",
+                            @"Wählen Sie ein Album", @"Select an Album",
+                            @"Wählen Sie ein Foto", @"Pick Photo",
+                            @"Maximal %d Fotos.", @"Maximum %d photos.",
+                            @"Sie können nur %d Fotos auf einmal auswählen.", @"You can only select %d photos at a time.",
+                            @"Okay", @"Okay",
+                            @"Fertig", @"Done",
+                            @"Abbrechen", @"Cancel",
+                            @"Zurück", @"Back",
+                            @"%d", @"%d",
+                            nil];
+
+        NSDictionary *hu = [NSDictionary dictionaryWithObjectsAndKeys:@"Kiválasztva %d a %d-ból", @"Selected %d of %d",
+                            @"Kiválasztva %d", @"Selected %d",
+                            @"Beolvasás", @"Loading...",
+                            @"Album hiba: %@ - %@", @"Album Error: %@ - %@",
+                            @"Válasszon albumot", @"Select an Album",
+                            @"Válasszon fotót", @"Pick Photo",
+                            @"Maximum %d fotó.", @"Maximum %d photos.",
+                            @"Egyszerre csak %d fotót választhat.", @"You can only select %d photos at a time.",
+                            @"Rendben", @"Okay",
+                            @"Kész", @"Done",
+                            @"Törlés", @"Cancel",
+                            @"Vissza", @"Back",
+                            @"%d", @"%d",
+                            nil];
+
+        NSDictionary *pl = [NSDictionary dictionaryWithObjectsAndKeys:@"Wybrane %d z %d", @"Selected %d of %d",
+                            @"Wybrane %d", @"Selected %d",
+                            @"Wczytuję...", @"Loading...",
+                            @"Błąd albumu: %@ - %@", @"Album Error: %@ - %@",
+                            @"Wybierz album", @"Select an Album",
+                            @"Wybierz zdjęcie", @"Pick Photo",
+                            @"Maksymalnie %d zdjęć.", @"Maximum %d photos.",
+                            @"Możesz wybrać naraz tylko %d zdjęć.", @"You can only select %d photos at a time.",
+                            @"Okay", @"Okay",
+                            @"Gotowe", @"Done",
+                            @"Anuluj", @"Cancel",
+                            @"Wstecz", @"Back",
+                            @"%d", @"%d",
+                            nil];
+
+        dict = [NSDictionary dictionaryWithObjectsAndKeys:cs, @"cs", sk, @"sk", de, @"de", pl, @"pl", hu, "@hu", nil];
     }
 
     return [dict objectForKey:locale];
