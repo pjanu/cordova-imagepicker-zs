@@ -30,6 +30,9 @@
     UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithTitle:[LocalizedString get:@"Cancel"] style:UIBarButtonItemStyleDone target:self.parent action:@selector(cancelImagePicker)];
     [self.navigationItem setRightBarButtonItem:cancelButton];
 
+    UIBarButtonItem *backButton = [[UIBarButtonItem alloc] initWithTitle:[LocalizedString get:@"Back"] style:UIBarButtonItemStyleBordered target:nil action:nil];
+    [self.navigationItem setBackBarButtonItem:backButton];
+
     NSMutableArray *tempArray = [[NSMutableArray alloc] init];
 	self.assetGroups = tempArray;
 
@@ -144,6 +147,7 @@
     picker.titleStyle = [(id) self.parent titleStyle];
     picker.limitedOrientation = [(id) self.parent limitedOrientation];
     picker.selectedImages = self.selectedImages;
+    picker.overlayColor = [(id) self.parent overlayColor];
 
     picker.assetGroup = [self.assetGroups objectAtIndex:indexPath.row];
     [picker.assetGroup setAssetsFilter:[ALAssetsFilter allPhotos]];
@@ -151,6 +155,9 @@
 	picker.assetPickerFilterDelegate = self.assetPickerFilterDelegate;
 	picker.immediateReturn = self.immediateReturn;
     picker.singleSelection = self.singleSelection;
+
+    picker.simpleHeader = [(id) self.parent simpleHeader];
+    picker.countOkEval = [(id) self.parent countOkEval];
 	
 	[self.navigationController pushViewController:picker animated:YES];
 }

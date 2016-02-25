@@ -41,6 +41,9 @@
 @property (nonatomic, strong) NSArray *selected;
 @property (nonatomic, strong) AssetPickerTitleStyle *titleStyle;
 @property (nonatomic, strong) InterfaceOrientation *limitedOrientation;
+@property (nonatomic, assign) BOOL simpleHeader;
+@property (nonatomic, assign) BOOL countOkEval;
+@property (nonatomic, strong) UIColor *overlayColor;
 
 /**
  * YES if the picker should return the original image,

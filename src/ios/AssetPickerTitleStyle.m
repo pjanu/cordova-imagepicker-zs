@@ -8,6 +8,7 @@
 @implementation AssetPickerTitleStyle
 
 const NSString *SHORT_STYLE = @"selectedOnly";
+const NSString *NUMBER_STYLE = @"numberOnly";
 
 -(id)initWithStyle:(NSString *)style {
     self = [super init];
@@ -27,7 +28,15 @@ const NSString *SHORT_STYLE = @"selectedOnly";
 }
 
 -(void)setStyle:(NSString *)style {
-    self.placeholderString = [SHORT_STYLE isEqual:style] ? @"Selected %d" : @"Selected %d of %d";
+    if ([SHORT_STYLE isEqualToString:style]) {
+        self.placeholderString = @"Selected %d";
+    }
+    else if ([NUMBER_STYLE isEqualToString:style]) {
+        self.placeholderString = @"%d";
+    }
+    else {
+        self.placeholderString = @"Selected %d of %d";
+    }
 }
 
 @end

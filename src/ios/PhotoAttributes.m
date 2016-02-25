@@ -19,6 +19,7 @@
         self.largePhotoName = filePath;
         self.thumbnailName = filePath;
         self.miniPhotoName = filePath;
+        self.originalPhotoName = filePath;
         self.originalFilePath = filePath;
         self.originalPhotoWidth = @0;
         self.originalPhotoHeight = @0;
@@ -36,6 +37,7 @@
     return [NSDictionary dictionaryWithObjectsAndKeys:self.largePhotoName, @"largePhotoName",
             self.thumbnailName, @"thumbnailName",
             self.miniPhotoName, @"miniPhotoName",
+            self.originalPhotoName, @"originalPhotoName",
             self.originalFilePath, @"originalFilePath",
             self.originalPhotoWidth, @"originalPhotoWidth",
             self.originalPhotoHeight, @"originalPhotoHeight",

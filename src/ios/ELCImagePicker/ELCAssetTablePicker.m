@@ -37,17 +37,25 @@
 - (void)viewDidLoad
 {
     [self.tableView setSeparatorStyle:UITableViewCellSeparatorStyleNone];
-	[self.tableView setAllowsSelection:NO];
+    [self.tableView setAllowsSelection:NO];
+
+    self.cellWidth = [self calculateWidthOfCell];
+
+    self.titleView = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, self.simpleHeader ? 30 : self.view.bounds.size.width, 30)];
+    [self.titleView setBackgroundColor:[self getTitleViewBackground]];
+    [self.titleView setTextAlignment:NSTextAlignmentCenter];
 
     NSMutableArray *tempArray = [[NSMutableArray alloc] init];
     self.elcAssets = tempArray;
-	
+
     if (self.immediateReturn) {
         
     } else {
         UIBarButtonItem *doneButtonItem = [[UIBarButtonItem alloc] initWithTitle:[LocalizedString get:@"Done"] style:UIBarButtonItemStyleDone target:self action:@selector(doneAction:)];
         [self.navigationItem setRightBarButtonItem:doneButtonItem];
         [self setTitle:[LocalizedString get:@"Loading..."]];
+
+        [self.navigationItem setTitleView:self.titleView];
     }
 
 	[self performSelectorInBackground:@selector(preparePhotos) withObject:nil];
@@ -55,7 +63,12 @@
 
 - (int) calculateCountOfColumns
 {
-    return self.view.bounds.size.width / 80;
+    return self.view.bounds.size.width / self.cellWidth;
+}
+
+- (int) calculateWidthOfCell
+{
+    return ceil([UIScreen mainScreen].bounds.size.width * 0.25);
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -137,22 +150,37 @@
             
             NSString *title = self.singleSelection ? [LocalizedString get:@"Pick Photo"] : [self getSelectedCountTitle];
             [self setTitle:title];
+            [self updateTitleView];
         });
     }
+}
+
+- (NSInteger)getCountOfSelectedPhotos {
+    return self.selection.addPhotoCount + (int) [self totalSelectedAssets];
 }
 
 - (void)updateSelectedCount {
     [self setTitle:[self getSelectedCountTitle]];
 }
 
+- (void)updateTitleView {
+    [self.titleView setBackgroundColor:[self getTitleViewBackground]];
+}
+
+- (UIColor *)getTitleViewBackground {
+    NSInteger count = [self getCountOfSelectedPhotos];
+    BOOL ok = self.countOkEval && count >= 12 && count <= 60 && count % 4 == 0;
+    UIColor *green = [UIColor colorWithRed:0.0f green:0.8f blue:0.2f alpha:0.9f];
+    return ok ? green : [UIColor clearColor];
+}
+
 - (NSString *)getSelectedCountTitle {
     NSString *placeholder = [self.titleStyle getPlaceholderString];
-    NSInteger selected = self.selection.addPhotoCount + (int) [self totalSelectedAssets];
-    return [NSString stringWithFormat:[LocalizedString get:placeholder], selected, self.selection.maximumPhotoCount];
+    return [NSString stringWithFormat:[LocalizedString get:placeholder], [self getCountOfSelectedPhotos], self.selection.maximumPhotoCount];
 }
 
 - (void)setTitle:(NSString *)title {
-    [self.navigationItem setTitle:title];
+    [self.titleView setText:title];
 }
 
 - (NSInteger)findAsset:(NSMutableArray *)selectedAssetsImages withIdentifier:(NSString *)identifier
@@ -280,6 +308,7 @@
 
     if (cell == nil) {		        
         cell = [[ELCAssetCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
+        cell.width = self.cellWidth;
     }
     
     [cell setAssets:[self assetsForIndexPath:indexPath]];
@@ -289,13 +318,13 @@
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-	return 79;
+	return self.cellWidth;
 }
 
 - (int)totalSelectedAssets
 {
     NSArray *selected = [[self selectedImages] allKeys];
-    int count = [selected count];
+    int count = (int) [selected count];
     
     for (ELCAsset *asset in self.elcAssets) {
         NSString *identifier = [[AssetIdentifier alloc] initWithAsset:[asset asset]].url;

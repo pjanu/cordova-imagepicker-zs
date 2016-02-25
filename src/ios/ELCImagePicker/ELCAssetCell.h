@@ -10,6 +10,8 @@
 
 @interface ELCAssetCell : UITableViewCell
 
+@property (nonatomic, assign) int width;
+
 - (void)setAssets:(NSArray *)assets;
 
 @end
