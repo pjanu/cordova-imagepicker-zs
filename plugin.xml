@@ -2,7 +2,7 @@
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
   xmlns:android="http://schemas.android.com/apk/res/android"
   id="com.synconset.imagepicker-zetbook"
-  version="1.0.43">
+  version="1.0.44">
 
 	<name>ImagePicker Zetbook</name>
 
@@ -138,5 +138,6 @@
 		<source-file src="src/android/Library/res/values-hu/multiimagechooser_strings_hu.xml" target-dir="res/values-hu"/>
 		<source-file src="src/android/Library/res/values-ja/multiimagechooser_strings_ja.xml" target-dir="res/values-ja"/>
 		<source-file src="src/android/Library/res/values-ko/multiimagechooser_strings_ko.xml" target-dir="res/values-ko"/>
+		<source-file src="src/android/Library/res/values-pl/multiimagechooser_strings_pl.xml" target-dir="res/values-pl"/>
 	</platform>
 </plugin>

@@ -157,13 +157,13 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
 
     private String selectedLang = "en";
 
-    private String strChosen = "Picked";
+    private String strChosen = "Selected";
     private String strOf = "of";
-    private String strProcessing = "Processing photos";
+    private String strProcessing = "Processing photographs";
     private String strProcessingNote = "Processing may take a while";
-    private String strChooseMax = "Max";
+    private String strChooseMax = "Maximum";
     private String strChooseMaxPhotos = "photos";
-    private String strChooseNoteMax = "You can choose max";
+    private String strChooseNoteMax = "You can select a maximum of";
     private String strChooseNoteMaxPhotos = "photos";
 
     @Override
@@ -191,6 +191,39 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
             strChooseMaxPhotos = "fotiek";
             strChooseNoteMax = "Môžete vybrať maximálne";
             strChooseNoteMaxPhotos = "fotiek";
+        }
+        else if(selectedLang.equals("pl"))
+        {
+            strChosen = 'Wybrane';
+            strOf = 'z';
+            strProcessing = 'Opracowuję fotografie';
+            strProcessingNote = 'Opracowywanie może chwilę potrwać';
+            strChooseMax = 'Maksimum';
+            strChooseMaxPhotos = 'zdjęć';
+            strChooseNoteMax = 'Można wybrać maksymalnie';
+            strChooseNoteMaxPhotos = 'zdjęć';
+        }
+        else if(selectedLang.equals("hu"))
+        {
+            strChosen = 'Kiválasztva';
+            strOf = 'ból';
+            strProcessing = 'A fényképek feldolgozása folyamatban';
+            strProcessingNote = 'A feldolgozás eltarthat egy ideig';
+            strChooseMax = 'Maximum';
+            strChooseMaxPhotos = 'fotó';
+            strChooseNoteMax = 'Választható maximum';
+            strChooseNoteMaxPhotos = 'fotó';
+        }
+        else if(selectedLang.equals("de"))
+        {
+            strChosen = 'Ausgewählt';
+            strOf = 'von';
+            strProcessing = 'Fotos werden verarbeitet';
+            strProcessingNote = 'Die Verarbeitung kann ein wenig dauern';
+            strChooseMax = 'Maximal';
+            strChooseMaxPhotos = 'Fotos';
+            strChooseNoteMax = 'Sie können maximal';
+            strChooseNoteMaxPhotos = 'Fotos auswählen';
         }
 
         // Log.d("ZETBOOK", "onCreate");
