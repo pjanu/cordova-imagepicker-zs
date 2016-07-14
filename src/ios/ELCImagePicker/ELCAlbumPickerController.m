@@ -127,7 +127,12 @@
     // Get count
     ALAssetsGroup *g = (ALAssetsGroup*)[self.assetGroups objectAtIndex:indexPath.row];
     [g setAssetsFilter:[ALAssetsFilter allPhotos]];
-    NSInteger gCount = [g numberOfAssets];
+    __block NSInteger gCount = 0;
+
+    [g enumerateAssetsUsingBlock:^(ALAsset *asset, NSUInteger index, BOOL *stop) {
+        if(asset.defaultRepresentation)
+            gCount++;
+    }];
     
     cell.textLabel.text = [NSString stringWithFormat:@"%@ (%ld)",[g valueForProperty:ALAssetsGroupPropertyName], (long)gCount];
     [cell.imageView setImage:[UIImage imageWithCGImage:[(ALAssetsGroup*)[self.assetGroups objectAtIndex:indexPath.row] posterImage]]];

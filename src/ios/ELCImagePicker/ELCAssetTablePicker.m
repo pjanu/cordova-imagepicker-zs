@@ -126,7 +126,7 @@
                 isAssetFiltered = [self.assetPickerFilterDelegate assetTablePicker:self isAssetFilteredOut:(ELCAsset*)elcAsset];
             }
 
-            if (!isAssetFiltered) {
+            if (!isAssetFiltered && elcAsset.asset.defaultRepresentation) {
                 [self.elcAssets addObject:elcAsset];
             }
 
