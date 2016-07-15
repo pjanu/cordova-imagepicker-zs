@@ -9,10 +9,7 @@
 #import "ELCImagePickerController.h"
 #import "ELCAssetTablePicker.h"
 #import "LocalizedString.h"
-
-@interface ELCAlbumPickerController ()
-
-@end
+#import "AssetLibraryPhotoAlbum.h"
 
 @implementation ELCAlbumPickerController
 
@@ -37,11 +34,10 @@
     self.assetGroups = tempArray;
 
     // Load Albums into assetGroups
-    dispatch_async(dispatch_get_main_queue(), ^
-    {
-        @autoreleasepool {
-
-        // Group enumerator Block
+    dispatch_async(dispatch_get_main_queue(), ^{
+        @autoreleasepool
+        {
+            // Group enumerator Block
             void (^assetGroupEnumerator)(ALAssetsGroup *, BOOL *) = ^(ALAssetsGroup *group, BOOL *stop)
             {
                 if (group == nil) {
@@ -51,12 +47,15 @@
                 // added fix for camera albums order
                 NSString *sGroupPropertyName = (NSString *)[group valueForProperty:ALAssetsGroupPropertyName];
                 NSUInteger nType = [[group valueForProperty:ALAssetsGroupPropertyType] intValue];
+                [group setAssetsFilter:[ALAssetsFilter allPhotos]];
+
+                NSObject<PhotoAlbum> *album = [[AssetLibraryPhotoAlbum alloc] init:group];
 
                 if ([[sGroupPropertyName lowercaseString] isEqualToString:@"camera roll"] && nType == ALAssetsGroupSavedPhotos) {
-                    [self.assetGroups insertObject:group atIndex:0];
+                    [self.assetGroups insertObject:album atIndex:0];
                 }
                 else {
-                    [self.assetGroups addObject:group];
+                    [self.assetGroups addObject:album];
                 }
 
                 // Reload albums
@@ -64,8 +63,8 @@
             };
 
             // Group Enumerator Failure Block
-            void (^assetGroupEnumberatorFailure)(NSError *) = ^(NSError *error) {
-
+            void (^assetGroupEnumberatorFailure)(NSError *) = ^(NSError *error)
+            {
                 UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Error" message:[NSString stringWithFormat:[LocalizedString get:@"Album Error: %@ - %@"], [error localizedDescription], [error localizedRecoverySuggestion]] delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil];
                 [alert show];
 
@@ -74,9 +73,8 @@
 
             // Enumerate Albums
             [self.library enumerateGroupsWithTypes:ALAssetsGroupAll
-                                   usingBlock:assetGroupEnumerator
-                                 failureBlock:assetGroupEnumberatorFailure];
-
+                          usingBlock:assetGroupEnumerator
+                          failureBlock:assetGroupEnumberatorFailure];
         }
     });
 }
@@ -124,18 +122,10 @@
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
     }
 
-    // Get count
-    ALAssetsGroup *g = (ALAssetsGroup*)[self.assetGroups objectAtIndex:indexPath.row];
-    [g setAssetsFilter:[ALAssetsFilter allPhotos]];
-    __block NSInteger gCount = 0;
+    NSObject<PhotoAlbum> *album = (NSObject<PhotoAlbum>*)[self.assetGroups objectAtIndex:indexPath.row];
 
-    [g enumerateAssetsUsingBlock:^(ALAsset *asset, NSUInteger index, BOOL *stop) {
-        if(asset.defaultRepresentation)
-            gCount++;
-    }];
-
-    cell.textLabel.text = [NSString stringWithFormat:@"%@ (%ld)",[g valueForProperty:ALAssetsGroupPropertyName], (long)gCount];
-    [cell.imageView setImage:[UIImage imageWithCGImage:[(ALAssetsGroup*)[self.assetGroups objectAtIndex:indexPath.row] posterImage]]];
+    cell.textLabel.text = [NSString stringWithFormat:@"%@ (%ld)",[album getTitle], (long) [album getCount]];
+    [cell.imageView setImage:[album getThumbnail]];
     [cell setAccessoryType:UITableViewCellAccessoryDisclosureIndicator];
 
     return cell;
@@ -154,7 +144,7 @@
     picker.selectedImages = self.selectedImages;
     picker.overlayColor = [(id) self.parent overlayColor];
 
-    picker.assetGroup = [self.assetGroups objectAtIndex:indexPath.row];
+    picker.assetGroup = [[self.assetGroups objectAtIndex:indexPath.row] getAssetGroup];
     [picker.assetGroup setAssetsFilter:[ALAssetsFilter allPhotos]];
 
     picker.assetPickerFilterDelegate = self.assetPickerFilterDelegate;

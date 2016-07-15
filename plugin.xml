@@ -61,6 +61,11 @@
 		<header-file src="src/ios/Spinner.h" />
 		<source-file src="src/ios/Spinner.m" />
 
+		<header-file src="src/ios/PhotoAlbum.h" />
+
+		<source-file src="src/ios/ALAssetLibraryPhotoAlbum.h" />
+		<source-file src="src/ios/ALAssetLibraryPhotoAlbum.m" />
+
 		<header-file src="src/ios/ELCImagePicker/ELCAlbumPickerController.h" />
 		<source-file src="src/ios/ELCImagePicker/ELCAlbumPickerController.m" />
 
