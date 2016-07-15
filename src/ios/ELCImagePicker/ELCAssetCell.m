@@ -53,25 +53,25 @@
 
     for (int i = 0; i < [_rowAssets count]; ++i) {
 
-        ELCAsset *asset = [_rowAssets objectAtIndex:i];
+        ELCAsset *elcAsset = [_rowAssets objectAtIndex:i];
 
         if (i < [_imageViewArray count]) {
             UIImageView *imageView = [_imageViewArray objectAtIndex:i];
-            imageView.image = [UIImage imageWithCGImage:asset.asset.thumbnail];
+            imageView.image = [elcAsset.asset getThumbnail];
         } else {
-            UIImageView *imageView = [[UIImageView alloc] initWithImage:[UIImage imageWithCGImage:asset.asset.thumbnail]];
+            UIImageView *imageView = [[UIImageView alloc] initWithImage:[elcAsset.asset getThumbnail]];
             [_imageViewArray addObject:imageView];
         }
 
         if (i < [_overlayViewArray count]) {
             UIView *overlayView = [_overlayViewArray objectAtIndex:i];
-            overlayView.hidden = asset.selected ? NO : YES;
+            overlayView.hidden = elcAsset.selected ? NO : YES;
         } else {
             UIView *overlayView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, size, size)];
-            UIColor *overlayColor = [[(id) asset.parent overlayColor] colorWithAlphaComponent:0.75f];
+            UIColor *overlayColor = [[(id) elcAsset.parent overlayColor] colorWithAlphaComponent:0.75f];
             [overlayView setBackgroundColor:overlayColor];
             [_overlayViewArray addObject:overlayView];
-            overlayView.hidden = asset.selected ? NO : YES;
+            overlayView.hidden = elcAsset.selected ? NO : YES;
         }
     }
 }

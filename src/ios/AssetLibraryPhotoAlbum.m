@@ -4,7 +4,7 @@
 //
 
 #import "AssetLibraryPhotoAlbum.h"
-#import "ELCAsset.h"
+#import "AssetLibraryPhotoAsset.h"
 
 @implementation AssetLibraryPhotoAlbum
 
@@ -42,7 +42,7 @@
 
         if(asset.defaultRepresentation)
         {
-            [photos addObject:[[ELCAsset alloc] initWithAsset:asset]];
+            [photos addObject:[[AssetLibraryPhotoAsset alloc] initWithAsset:asset]];
         }
     }];
 

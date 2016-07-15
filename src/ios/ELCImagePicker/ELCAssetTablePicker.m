@@ -11,6 +11,8 @@
 #import "ELCAlbumPickerController.h"
 #import "AssetIdentifier.h"
 #import "LocalizedString.h"
+#import "PhotoAsset.h"
+#import "AssetLibraryPhotoAsset.h"
 #import <UIKit/UIKit.h>
 
 @implementation ELCAssetTablePicker
@@ -104,14 +106,14 @@
 {
     @autoreleasepool {
 
-        self.elcAssets = [self.album getPhotos];
-
-        for (ELCAsset *elcAsset in self.elcAssets)
+        for (NSObject<PhotoAsset> *photoAsset in [self.album getPhotos])
         {
+            ELCAsset *elcAsset = [[ELCAsset alloc] initWithAsset:photoAsset];
             [elcAsset setParent:self];
-            NSString *identifier = [[AssetIdentifier alloc] initWithAsset:elcAsset.asset].url;
+            NSString *identifier = [[photoAsset getIdentifier] url];
             BOOL isSelected = [[self.selectedImages allKeys] containsObject:identifier];
             [elcAsset setSelected:isSelected];
+            [self.elcAssets addObject:elcAsset];
         }
 
         dispatch_sync(dispatch_get_main_queue(), ^{
@@ -179,16 +181,21 @@
 {
     NSMutableArray *selectedAssetsImages = [[NSMutableArray alloc] initWithArray:[self.selectedImages allValues]];
 
-    for (ELCAsset *elcAsset in self.elcAssets) {
-        ALAsset *asset = [elcAsset asset];
-        NSString *identifier = [[AssetIdentifier alloc] initWithAsset:asset].url;
+    for(ELCAsset *elcAsset in self.elcAssets)
+    {
+        //TODO should not work with concrete implementation but with abstract PhotoAsset
+        AssetLibraryPhotoAsset *photoAsset = (AssetLibraryPhotoAsset*) elcAsset.asset;
+        ALAsset *asset = photoAsset.asset;
+        NSString *identifier = [[photoAsset getIdentifier] url];
         BOOL isSelected = [elcAsset selected];
         BOOL alreadySelected = [[self.selectedImages allKeys] containsObject:identifier];
 
-        if (isSelected && !alreadySelected) {
+        if(isSelected && !alreadySelected)
+        {
             [selectedAssetsImages addObject:asset];
         }
-        else if(!isSelected && alreadySelected) {
+        else if(!isSelected && alreadySelected)
+        {
             NSInteger index = [self findAsset:selectedAssetsImages withIdentifier:identifier];
             [selectedAssetsImages removeObjectAtIndex:index];
         }
@@ -306,12 +313,12 @@
     NSArray *selected = [[self selectedImages] allKeys];
     int count = (int) [selected count];
 
-    for (ELCAsset *asset in self.elcAssets) {
-        NSString *identifier = [[AssetIdentifier alloc] initWithAsset:[asset asset]].url;
-        if (!asset.selected && [selected containsObject:identifier]) {
+    for (ELCAsset *elcAsset in self.elcAssets) {
+        NSString *identifier = [[elcAsset.asset getIdentifier] url];
+        if (!elcAsset.selected && [selected containsObject:identifier]) {
             count--;
         }
-        else if (asset.selected && ![selected containsObject:identifier]) {
+        else if (elcAsset.selected && ![selected containsObject:identifier]) {
             count++;
         }
     }
