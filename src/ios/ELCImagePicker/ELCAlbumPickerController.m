@@ -31,8 +31,7 @@
     UIBarButtonItem *backButton = [[UIBarButtonItem alloc] initWithTitle:[LocalizedString get:@"Back"] style:UIBarButtonItemStyleBordered target:nil action:nil];
     [self.navigationItem setBackBarButtonItem:backButton];
 
-    AssetLibraryPhotoLibrary *library = [[AssetLibraryPhotoLibrary alloc] init:self.library];
-    self.assetGroups = [library fetchAlbums:^{
+    self.assetGroups = [self.library fetchAlbums:^{
         [self performSelectorOnMainThread:@selector(reloadTableView) withObject:nil waitUntilDone:YES];
     }];
 }

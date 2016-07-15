@@ -16,6 +16,7 @@
 #import "AssetPickerTitleStyle.h"
 #import "InterfaceOrientation.h"
 #import <CoreLocation/CoreLocation.h>
+#import "AssetLibraryPhotoLibrary.h"
 
 #define CDV_PHOTO_PREFIX @"cdv_photo_"
 
@@ -79,7 +80,7 @@
     imagePicker.overlayColor = [self colorFromNumber:selectedColor];
 
     albumController.selectedImages = selectedImages;
-    albumController.library = self.library;
+    albumController.library = [[AssetLibraryPhotoLibrary alloc] init:self.library];
     albumController.parent = imagePicker;
     self.callbackId = command.callbackId;
     // Present modally
