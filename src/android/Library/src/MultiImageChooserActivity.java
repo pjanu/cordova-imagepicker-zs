@@ -1202,7 +1202,7 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
             // Add file name prefix here since Android crashes when filename is number
             String name = "tmp-" + fileName.substring(0, index);
             String ext = fileName.substring(index);
-            File file = File.createTempFile(name, ext);
+            File file = File.createTempFile(name, ext, File.getFilesDir());
             Log.d("ZETBOOK", "** creatimg temp file: " +  file.getAbsolutePath());
             OutputStream outStream = new FileOutputStream(file);
 
@@ -1236,7 +1236,7 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
             // Add file name prefix here since Android crashes when filename is number
             String name =  "tmp-" + fileName.substring(0, index);
             String ext = fileName.substring(index);
-            File file = File.createTempFile(name, ext);
+            File file = File.createTempFile(name, ext, File.getFilesDir());
 
             OutputStream outStream = new FileOutputStream(file);
 
