@@ -10,6 +10,7 @@
 #import "ELCAssetTablePicker.h"
 #import "LocalizedString.h"
 #import "AssetLibraryPhotoAlbum.h"
+#import "AssetLibraryPhotoLibrary.h"
 
 @implementation ELCAlbumPickerController
 
@@ -30,53 +31,10 @@
     UIBarButtonItem *backButton = [[UIBarButtonItem alloc] initWithTitle:[LocalizedString get:@"Back"] style:UIBarButtonItemStyleBordered target:nil action:nil];
     [self.navigationItem setBackBarButtonItem:backButton];
 
-    NSMutableArray *tempArray = [[NSMutableArray alloc] init];
-    self.assetGroups = tempArray;
-
-    // Load Albums into assetGroups
-    dispatch_async(dispatch_get_main_queue(), ^{
-        @autoreleasepool
-        {
-            // Group enumerator Block
-            void (^assetGroupEnumerator)(ALAssetsGroup *, BOOL *) = ^(ALAssetsGroup *group, BOOL *stop)
-            {
-                if (group == nil) {
-                    return;
-                }
-
-                // added fix for camera albums order
-                NSString *sGroupPropertyName = (NSString *)[group valueForProperty:ALAssetsGroupPropertyName];
-                NSUInteger nType = [[group valueForProperty:ALAssetsGroupPropertyType] intValue];
-                [group setAssetsFilter:[ALAssetsFilter allPhotos]];
-
-                NSObject<PhotoAlbum> *album = [[AssetLibraryPhotoAlbum alloc] init:group];
-
-                if ([[sGroupPropertyName lowercaseString] isEqualToString:@"camera roll"] && nType == ALAssetsGroupSavedPhotos) {
-                    [self.assetGroups insertObject:album atIndex:0];
-                }
-                else {
-                    [self.assetGroups addObject:album];
-                }
-
-                // Reload albums
-                [self performSelectorOnMainThread:@selector(reloadTableView) withObject:nil waitUntilDone:YES];
-            };
-
-            // Group Enumerator Failure Block
-            void (^assetGroupEnumberatorFailure)(NSError *) = ^(NSError *error)
-            {
-                UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Error" message:[NSString stringWithFormat:[LocalizedString get:@"Album Error: %@ - %@"], [error localizedDescription], [error localizedRecoverySuggestion]] delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil];
-                [alert show];
-
-                NSLog(@"A problem occured %@", [error description]);
-            };
-
-            // Enumerate Albums
-            [self.library enumerateGroupsWithTypes:ALAssetsGroupAll
-                          usingBlock:assetGroupEnumerator
-                          failureBlock:assetGroupEnumberatorFailure];
-        }
-    });
+    AssetLibraryPhotoLibrary *library = [[AssetLibraryPhotoLibrary alloc] init:self.library];
+    self.assetGroups = [library fetchAlbums:^{
+        [self performSelectorOnMainThread:@selector(reloadTableView) withObject:nil waitUntilDone:YES];
+    }];
 }
 
 - (void)reloadTableView
