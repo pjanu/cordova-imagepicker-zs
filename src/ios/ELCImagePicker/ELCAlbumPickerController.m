@@ -101,8 +101,7 @@
     picker.selectedImages = self.selectedImages;
     picker.overlayColor = [(id) self.parent overlayColor];
 
-    picker.assetGroup = [[self.assetGroups objectAtIndex:indexPath.row] getAssetGroup];
-    [picker.assetGroup setAssetsFilter:[ALAssetsFilter allPhotos]];
+    picker.album = [self.assetGroups objectAtIndex:indexPath.row];
 
     picker.assetPickerFilterDelegate = self.assetPickerFilterDelegate;
     picker.immediateReturn = self.immediateReturn;

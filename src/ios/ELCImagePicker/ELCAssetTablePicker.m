@@ -13,12 +13,6 @@
 #import "LocalizedString.h"
 #import <UIKit/UIKit.h>
 
-@interface ELCAssetTablePicker ()
-
-@property (nonatomic, assign) int columns;
-
-@end
-
 @implementation ELCAssetTablePicker
 
 //Using auto synthesizers
@@ -110,42 +104,28 @@
 {
     @autoreleasepool {
 
-        [self.assetGroup enumerateAssetsUsingBlock:^(ALAsset *result, NSUInteger index, BOOL *stop) {
+        self.elcAssets = [self.album getPhotos];
 
-            if (result == nil) {
-                return;
-            }
-
-            ELCAsset *elcAsset = [[ELCAsset alloc] initWithAsset:result];
+        for (ELCAsset *elcAsset in self.elcAssets)
+        {
             [elcAsset setParent:self];
-
-            BOOL isAssetFiltered = NO;
-            if (self.assetPickerFilterDelegate &&
-               [self.assetPickerFilterDelegate respondsToSelector:@selector(assetTablePicker:isAssetFilteredOut:)])
-            {
-                isAssetFiltered = [self.assetPickerFilterDelegate assetTablePicker:self isAssetFilteredOut:(ELCAsset*)elcAsset];
-            }
-
-            if (!isAssetFiltered && elcAsset.asset.defaultRepresentation) {
-                [self.elcAssets addObject:elcAsset];
-            }
-
-            NSString *identifier = [[AssetIdentifier alloc] initWithAsset:result].url;
+            NSString *identifier = [[AssetIdentifier alloc] initWithAsset:elcAsset.asset].url;
             BOOL isSelected = [[self.selectedImages allKeys] containsObject:identifier];
             [elcAsset setSelected:isSelected];
-         }];
+        }
 
         dispatch_sync(dispatch_get_main_queue(), ^{
             [self.tableView reloadData];
             // scroll to bottom
             long section = [self numberOfSectionsInTableView:self.tableView] - 1;
             long row = [self tableView:self.tableView numberOfRowsInSection:section] - 1;
-            if (section >= 0 && row >= 0) {
+            if(section >= 0 && row >= 0)
+            {
                 NSIndexPath *ip = [NSIndexPath indexPathForRow:row
-                                                     inSection:section];
-                        [self.tableView scrollToRowAtIndexPath:ip
-                                              atScrollPosition:UITableViewScrollPositionBottom
-                                                      animated:NO];
+                                               inSection:section];
+                [self.tableView scrollToRowAtIndexPath:ip
+                                atScrollPosition:UITableViewScrollPositionBottom
+                                animated:NO];
             }
 
             NSString *title = self.singleSelection ? [LocalizedString get:@"Pick Photo"] : [self getSelectedCountTitle];

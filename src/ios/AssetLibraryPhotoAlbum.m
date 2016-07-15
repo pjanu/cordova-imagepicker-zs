@@ -4,6 +4,7 @@
 //
 
 #import "AssetLibraryPhotoAlbum.h"
+#import "ELCAsset.h"
 
 @implementation AssetLibraryPhotoAlbum
 
@@ -29,9 +30,23 @@
     return count;
 }
 
-- (NSArray *)getPhotos
+- (NSMutableArray *)getPhotos
 {
-    return [[NSArray alloc] init];
+    __block NSMutableArray *photos = [[NSMutableArray alloc] init];
+
+    [self.assetGroup enumerateAssetsUsingBlock:^(ALAsset *asset, NSUInteger index, BOOL *stop){
+        if(asset == nil)
+        {
+            return;
+        }
+
+        if(asset.defaultRepresentation)
+        {
+            [photos addObject:[[ELCAsset alloc] initWithAsset:asset]];
+        }
+    }];
+
+    return photos;
 }
 
 - (NSString *)getTitle

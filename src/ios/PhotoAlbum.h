@@ -7,7 +7,7 @@
 
 - (NSString *)getTitle;
 - (NSUInteger)getCount;
-- (NSArray *)getPhotos;
+- (NSMutableArray *)getPhotos;
 - (UIImage *)getThumbnail;
 
 @end
