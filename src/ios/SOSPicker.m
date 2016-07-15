@@ -34,9 +34,9 @@
     NSString *orientation = [options objectForKey:@"orientation"];
     BOOL simpleHeader = [[options objectForKey:@"simpleHeader"] boolValue];
     BOOL countOkEval = [[options objectForKey:@"countOkEval"] boolValue];
-	self.width = [[options objectForKey:@"width"] integerValue];
-	self.height = [[options objectForKey:@"height"] integerValue];
-	self.quality = [[options objectForKey:@"quality"] integerValue];
+    self.width = [[options objectForKey:@"width"] integerValue];
+    self.height = [[options objectForKey:@"height"] integerValue];
+    self.quality = [[options objectForKey:@"quality"] integerValue];
 
     self.library = [[ALAssetsLibrary alloc] init];
 
@@ -55,16 +55,16 @@
         } failureBlock:^(NSError *error){}];
     }
 
-	// Create the an album controller and image picker
-	ELCAlbumPickerController *albumController = [[ELCAlbumPickerController alloc] init];
+    // Create the an album controller and image picker
+    ELCAlbumPickerController *albumController = [[ELCAlbumPickerController alloc] init];
 
-	if (maximumImagesCount == 1) {
-      albumController.immediateReturn = true;
-      albumController.singleSelection = true;
-   } else {
-      albumController.immediateReturn = false;
-      albumController.singleSelection = false;
-   }
+    if (maximumImagesCount == 1) {
+        albumController.immediateReturn = true;
+        albumController.singleSelection = true;
+    } else {
+        albumController.immediateReturn = false;
+        albumController.singleSelection = false;
+    }
 
     ELCImagePickerController *imagePicker = [[ELCImagePickerController alloc] initWithRootViewController:albumController];
     imagePicker.limitedOrientation = [InterfaceOrientation interfaceOrientationWithOrientation:orientation];
@@ -81,16 +81,16 @@
     albumController.selectedImages = selectedImages;
     albumController.library = self.library;
     albumController.parent = imagePicker;
-	self.callbackId = command.callbackId;
-	// Present modally
-	[self.viewController presentViewController:imagePicker
-	                       animated:YES
-	                     completion:nil];
+    self.callbackId = command.callbackId;
+    // Present modally
+    [self.viewController presentViewController:imagePicker
+                           animated:YES
+                         completion:nil];
 }
 
 
 - (void)elcImagePickerController:(ELCImagePickerController *)picker didFinishPickingMediaWithInfo:(NSArray *)info {
-	CDVPluginResult* result = nil;
+    CDVPluginResult* result = nil;
     NSMutableArray *addedFiles = [[NSMutableArray alloc] init];
     NSString* docsPath = [NSTemporaryDirectory()stringByStandardizingPath];
     NSFileManager* fileMgr = [[NSFileManager alloc] init];
@@ -162,14 +162,14 @@
 
             [addedFiles addObject:[attributes toJSONString]];
         }
-	}
+    }
 
     if (nil == result) {
         result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[self formatResult:addedFiles state:@"ok"]];
     }
 
-	[self.viewController dismissViewControllerAnimated:YES completion:nil];
-	[self.commandDelegate sendPluginResult:result callbackId:self.callbackId];
+    [self.viewController dismissViewControllerAnimated:YES completion:nil];
+    [self.commandDelegate sendPluginResult:result callbackId:self.callbackId];
 }
 
 - (NSDictionary *)formatResult:(NSMutableArray *)files state:(NSString *)resultState {
@@ -183,11 +183,11 @@
 }
 
 - (void)elcImagePickerControllerDidCancel:(ELCImagePickerController *)picker {
-	[self.viewController dismissViewControllerAnimated:YES completion:nil];
-	CDVPluginResult* pluginResult = nil;
+    [self.viewController dismissViewControllerAnimated:YES completion:nil];
+    CDVPluginResult* pluginResult = nil;
     NSMutableArray *emptyArray = [NSMutableArray array];
     pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[self formatResult:emptyArray state:@"cancelled"]];
-	[self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackId];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackId];
 }
 
 - (UIColor *)colorFromNumber:(NSInteger)color {

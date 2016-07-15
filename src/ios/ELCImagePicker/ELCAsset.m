@@ -14,12 +14,12 @@
 
 - (id)initWithAsset:(ALAsset*)asset
 {
-	self = [super init];
-	if (self) {
-		self.asset = asset;
+    self = [super init];
+    if (self) {
+        self.asset = asset;
         _selected = NO;
     }
-	return self;	
+    return self;
 }
 
 - (void)toggleSelection

@@ -49,7 +49,7 @@
     self.elcAssets = tempArray;
 
     if (self.immediateReturn) {
-        
+
     } else {
         UIBarButtonItem *doneButtonItem = [[UIBarButtonItem alloc] initWithTitle:[LocalizedString get:@"Done"] style:UIBarButtonItemStyleDone target:self action:@selector(doneAction:)];
         [self.navigationItem setRightBarButtonItem:doneButtonItem];
@@ -58,7 +58,7 @@
         [self.navigationItem setTitleView:self.titleView];
     }
 
-	[self performSelectorInBackground:@selector(preparePhotos) withObject:nil];
+    [self performSelectorInBackground:@selector(preparePhotos) withObject:nil];
 }
 
 - (int) calculateCountOfColumns
@@ -111,14 +111,14 @@
     @autoreleasepool {
 
         [self.assetGroup enumerateAssetsUsingBlock:^(ALAsset *result, NSUInteger index, BOOL *stop) {
-            
+
             if (result == nil) {
                 return;
             }
 
             ELCAsset *elcAsset = [[ELCAsset alloc] initWithAsset:result];
             [elcAsset setParent:self];
-            
+
             BOOL isAssetFiltered = NO;
             if (self.assetPickerFilterDelegate &&
                [self.assetPickerFilterDelegate respondsToSelector:@selector(assetTablePicker:isAssetFilteredOut:)])
@@ -147,7 +147,7 @@
                                               atScrollPosition:UITableViewScrollPositionBottom
                                                       animated:NO];
             }
-            
+
             NSString *title = self.singleSelection ? [LocalizedString get:@"Pick Photo"] : [self getSelectedCountTitle];
             [self setTitle:title];
             [self updateTitleView];
@@ -301,41 +301,41 @@
 
 // Customize the appearance of table view cells.
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
-{    
+{
     static NSString *CellIdentifier = @"Cell";
-        
+
     ELCAssetCell *cell = (ELCAssetCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
 
-    if (cell == nil) {		        
+    if (cell == nil) {
         cell = [[ELCAssetCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
         cell.width = self.cellWidth;
     }
-    
+
     [cell setAssets:[self assetsForIndexPath:indexPath]];
-    
+
     return cell;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-	return self.cellWidth;
+    return self.cellWidth;
 }
 
 - (int)totalSelectedAssets
 {
     NSArray *selected = [[self selectedImages] allKeys];
     int count = (int) [selected count];
-    
+
     for (ELCAsset *asset in self.elcAssets) {
         NSString *identifier = [[AssetIdentifier alloc] initWithAsset:[asset asset]].url;
-		if (!asset.selected && [selected containsObject:identifier]) {
+        if (!asset.selected && [selected containsObject:identifier]) {
             count--;
-		}
+        }
         else if (asset.selected && ![selected containsObject:identifier]) {
             count++;
         }
-	}
-    
+    }
+
     return count;
 }
 
