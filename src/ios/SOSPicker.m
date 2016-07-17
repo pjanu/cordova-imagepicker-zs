@@ -17,6 +17,7 @@
 #import "InterfaceOrientation.h"
 #import <CoreLocation/CoreLocation.h>
 #import "AssetLibraryPhotoLibrary.h"
+#import "AssetLibraryPhotoAsset.h"
 
 #define CDV_PHOTO_PREFIX @"cdv_photo_"
 
@@ -96,19 +97,18 @@
     NSString* docsPath = [NSTemporaryDirectory()stringByStandardizingPath];
     NSFileManager* fileMgr = [[NSFileManager alloc] init];
     NSString* filePath;
-    ALAsset* asset = nil;
+    NSObject<PhotoAsset> *asset = nil;
     CGSize targetSize = CGSizeMake(self.width, self.height);
 
-    for (NSDictionary *dict in info) {
-        asset = [dict objectForKey:@"ALAsset"];
+    for(NSDictionary *dict in info)
+    {
+        asset = [dict objectForKey:@"PhotoAsset"];
         // From ELCImagePickerController.m
 
-        @autoreleasepool {
-
+        @autoreleasepool
+        {
             PhotoAttributes *attributes = [[PhotoAttributes alloc] init];
-
-            ALAssetRepresentation *assetRep = [asset defaultRepresentation];
-            CGSize originalSize = [assetRep dimensions];
+            CGSize originalSize = [asset getOriginalSize];
 
             NSDictionary *resizes = [NSDictionary dictionaryWithObjectsAndKeys:[PhotoResize resizeWithCGSize:originalSize], @"originalPhotoName",
                                             [PhotoResize resizeWithCGSize:targetSize], @"largePhotoName",
@@ -124,14 +124,15 @@
                 {
                     PhotoResize *resize = [resizes objectForKey:key];
                     filePath = [self getFilePath:fileMgr inDir:docsPath size:resize.size];
+                    AssetLibraryPhotoAsset *alAsset = (AssetLibraryPhotoAsset*) asset;
 
                     if(self.width == 0 && self.height == 0)
                     {
-                        [images setValue:[self originalToFile:asset file:filePath] forKey:key];
+                        [images setValue:[self originalToFile:[alAsset getAsset] file:filePath] forKey:key];
                     }
                     else
                     {
-                        [images setValue:[self resizeToFile:asset file:filePath toSize:resize.size] forKey:key];
+                        [images setValue:[self resizeToFile:[alAsset getAsset] file:filePath toSize:resize.size] forKey:key];
                     }
 
                     [attributes setValue:[[NSURL fileURLWithPath:filePath] absoluteString] forKey:key];
@@ -143,7 +144,7 @@
                 }
             }
 
-            attributes.originalFilePath = [[AssetIdentifier alloc] initWithAsset:asset].url;
+            attributes.originalFilePath = [asset getIdentifier].url;
             attributes.originalPhotoWidth = [NSNumber numberWithFloat:originalSize.width];
             attributes.originalPhotoHeight = [NSNumber numberWithFloat:originalSize.height];
 
@@ -156,8 +157,8 @@
             attributes.finalWidth = [NSNumber numberWithInteger:largeImage.size.width];
             attributes.finalHeight = [NSNumber numberWithInteger:largeImage.size.height];
 
-            attributes.exifDate = [[asset valueForProperty:ALAssetPropertyDate] description];
-            CLLocation *location = [asset valueForProperty:ALAssetPropertyLocation];
+            attributes.exifDate = [[asset getExifDate] description];
+            CLLocation *location = [asset getLocation];
             attributes.exifLatitude = [NSNumber numberWithDouble:location.coordinate.latitude];
             attributes.exifLongitude = [NSNumber numberWithDouble:location.coordinate.longitude];
 
@@ -178,8 +179,9 @@
                          resultState, @"state", nil];
 }
 
-- (bool)isPortraitImage:(ALAsset *)asset {
-    UIImageOrientation orientation = [[asset valueForProperty:ALAssetPropertyOrientation] intValue];
+- (bool)isPortraitImage:(NSObject<PhotoAsset> *)asset
+{
+    UIImageOrientation orientation = [asset getOrientation];
     return orientation == UIImageOrientationLeft || orientation == UIImageOrientationRight || orientation == UIImageOrientationLeftMirrored || orientation == UIImageOrientationRight;
 }
 

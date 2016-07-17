@@ -12,5 +12,6 @@
 @property (nonatomic, assign) BOOL selected;
 
 - (id)initWithAsset:(ALAsset *)asset;
+- (ALAsset*)getAsset;
 
 @end

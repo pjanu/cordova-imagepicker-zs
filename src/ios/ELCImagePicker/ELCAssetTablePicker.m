@@ -11,8 +11,6 @@
 #import "ELCAlbumPickerController.h"
 #import "AssetIdentifier.h"
 #import "LocalizedString.h"
-#import "PhotoAsset.h"
-#import "AssetLibraryPhotoAsset.h"
 #import <UIKit/UIKit.h>
 
 @implementation ELCAssetTablePicker
@@ -183,16 +181,13 @@
 
     for(ELCAsset *elcAsset in self.elcAssets)
     {
-        //TODO should not work with concrete implementation but with abstract PhotoAsset
-        AssetLibraryPhotoAsset *photoAsset = (AssetLibraryPhotoAsset*) elcAsset.asset;
-        ALAsset *asset = photoAsset.asset;
-        NSString *identifier = [[photoAsset getIdentifier] url];
+        NSString *identifier = [[elcAsset.asset getIdentifier] url];
         BOOL isSelected = [elcAsset selected];
         BOOL alreadySelected = [[self.selectedImages allKeys] containsObject:identifier];
 
         if(isSelected && !alreadySelected)
         {
-            [selectedAssetsImages addObject:asset];
+            [selectedAssetsImages addObject:elcAsset.asset];
         }
         else if(!isSelected && alreadySelected)
         {
@@ -208,8 +203,8 @@
 {
     NSMutableDictionary *selectedImages = [[NSMutableDictionary alloc] init];
 
-    for (ALAsset *asset in [self getSelectedImages]) {
-        NSString *identifier = [[[AssetIdentifier alloc] initWithAsset:asset] url];
+    for (NSObject<PhotoAsset> *asset in [self getSelectedImages]) {
+        NSString *identifier = [[asset getIdentifier] url];
         selectedImages[identifier] = asset;
     }
 

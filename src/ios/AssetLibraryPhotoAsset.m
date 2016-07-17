@@ -17,7 +17,7 @@
     return self;
 }
 
-- (AssetIdentifier*)getIdentifier
+- (AssetIdentifier *)getIdentifier
 {
     return [[AssetIdentifier alloc] initWithAsset:self.asset];
 }
@@ -30,6 +30,36 @@
 - (UIImage *)getThumbnail
 {
     return [UIImage imageWithCGImage:[self.asset thumbnail]];
+}
+
+- (NSString *)getAssetType
+{
+    return [self.asset valueForProperty:ALAssetPropertyType];
+}
+
+- (CGSize)getOriginalSize
+{
+    return [[self.asset defaultRepresentation] dimensions];
+}
+
+- (UIImageOrientation)getOrientation;
+{
+    return [[self.asset valueForProperty:ALAssetPropertyOrientation] intValue];
+}
+
+- (NSString *)getExifDate
+{
+    return [self.asset valueForProperty:ALAssetPropertyDate];
+}
+
+- (CLLocation *)getLocation
+{
+    return [self.asset valueForProperty:ALAssetPropertyLocation];
+}
+
+- (ALAsset *)getAsset
+{
+    return self.asset;
 }
 
 @end

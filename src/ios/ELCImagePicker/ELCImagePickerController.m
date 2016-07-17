@@ -65,14 +65,16 @@
 {
     NSMutableArray *returnArray = [[NSMutableArray alloc] init];
 
-    for(ALAsset *asset in assets) {
-        id obj = [asset valueForProperty:ALAssetPropertyType];
-        if (!obj) {
+    for(NSObject<PhotoAsset> *asset in assets) {
+        id obj = [asset getAssetType];
+        if(!obj)
+        {
             continue;
         }
         NSMutableDictionary *workingDictionary = [[NSMutableDictionary alloc] init];
-        [workingDictionary setObject:asset forKey:@"ALAsset"];
-        [workingDictionary setObject:[[asset valueForProperty:ALAssetPropertyURLs] valueForKey:[[[asset valueForProperty:ALAssetPropertyURLs] allKeys] objectAtIndex:0]] forKey:UIImagePickerControllerReferenceURL];
+        [workingDictionary setObject:asset forKey:@"PhotoAsset"];
+        [workingDictionary setObject:[[asset getIdentifier] url] forKey:UIImagePickerControllerReferenceURL];
+        //[asset valueForProperty:ALAssetPropertyURLs] valueForKey:[[[asset valueForProperty:ALAssetPropertyURLs] allKeys] objectAtIndex:0]]
 
         [returnArray addObject:workingDictionary];
 
