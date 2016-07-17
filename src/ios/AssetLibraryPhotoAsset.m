@@ -24,7 +24,16 @@
 
 - (UIImage *)getImage
 {
-    return nil;
+    ALAssetRepresentation *assetRep = [self.asset defaultRepresentation];
+    UIImageOrientation orientation = (UIImageOrientation) [assetRep orientation];
+    return [self getImageWithOrientation:orientation];
+}
+
+- (UIImage *)getImageWithOrientation:(UIImageOrientation)orientation
+{
+    ALAssetRepresentation *assetRep = [self.asset defaultRepresentation];
+    CGImageRef imgRef = [assetRep fullScreenImage];
+    return [UIImage imageWithCGImage:imgRef scale:1.0f orientation:orientation];
 }
 
 - (UIImage *)getThumbnail

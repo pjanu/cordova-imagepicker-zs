@@ -17,7 +17,6 @@
 #import "InterfaceOrientation.h"
 #import <CoreLocation/CoreLocation.h>
 #import "AssetLibraryPhotoLibrary.h"
-#import "AssetLibraryPhotoAsset.h"
 
 #define CDV_PHOTO_PREFIX @"cdv_photo_"
 
@@ -124,15 +123,14 @@
                 {
                     PhotoResize *resize = [resizes objectForKey:key];
                     filePath = [self getFilePath:fileMgr inDir:docsPath size:resize.size];
-                    AssetLibraryPhotoAsset *alAsset = (AssetLibraryPhotoAsset*) asset;
 
                     if(self.width == 0 && self.height == 0)
                     {
-                        [images setValue:[self originalToFile:[alAsset getAsset] file:filePath] forKey:key];
+                        [images setValue:[self originalToFile:asset file:filePath] forKey:key];
                     }
                     else
                     {
-                        [images setValue:[self resizeToFile:[alAsset getAsset] file:filePath toSize:resize.size] forKey:key];
+                        [images setValue:[self resizeToFile:asset file:filePath toSize:resize.size] forKey:key];
                     }
 
                     [attributes setValue:[[NSURL fileURLWithPath:filePath] absoluteString] forKey:key];
@@ -214,13 +212,11 @@
     return filePath;
 }
 
-- (UIImage *)resizeToFile:(ALAsset *)asset file:(NSString *)filePath toSize:(CGSize)targetSize {
-    @autoreleasepool {
-        UIImageOrientation orientation = UIImageOrientationUp;
-        ALAssetRepresentation *assetRep = [asset defaultRepresentation];
-        CGImageRef imgRef = [assetRep fullScreenImage];
-
-        UIImage *image = [UIImage imageWithCGImage:imgRef scale:1.0f orientation:orientation];
+- (UIImage *)resizeToFile:(NSObject<PhotoAsset> *)asset file:(NSString *)filePath toSize:(CGSize)targetSize
+{
+    @autoreleasepool
+    {
+        UIImage *image = [asset getImageWithOrientation:UIImageOrientationUp];
         image = [self imageByScalingNotCroppingForSize:image toSize:targetSize];
         NSData *data = UIImageJPEGRepresentation(image, self.quality/100.0f);
         NSError *err;
@@ -234,11 +230,9 @@
     }
 }
 
-- (UIImage *)originalToFile:(ALAsset *)asset file:(NSString *)filePath {
-    ALAssetRepresentation *assetRep = [asset defaultRepresentation];
-    CGImageRef imgRef = [assetRep fullResolutionImage];
-    UIImageOrientation orientation = (UIImageOrientation) [assetRep orientation];
-    UIImage *image = [UIImage imageWithCGImage:imgRef scale:1.0f orientation:orientation];
+- (UIImage *)originalToFile:(NSObject<PhotoAsset> *)asset file:(NSString *)filePath
+{
+    UIImage *image = [asset getImage];
     NSData *data = UIImageJPEGRepresentation(image, self.quality/100.0f);
     NSError *err;
     if (![data writeToFile:filePath options:NSAtomicWrite error:&err]) {
