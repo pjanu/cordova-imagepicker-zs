@@ -5,6 +5,7 @@
 
 #import "AssetLibraryPhotoLibrary.h"
 #import "AssetLibraryPhotoAlbum.h"
+#import "AssetLibraryPhotoAsset.h"
 #import "LocalizedString.h"
 
 @implementation AssetLibraryPhotoLibrary
@@ -66,6 +67,24 @@
     });
 
     return albums;
+}
+
+- (NSMutableDictionary *)getSelectedPhotos:(NSArray *)identifiers
+{
+    NSMutableDictionary *selected = [[NSMutableDictionary alloc] init];
+    for(NSString *identifier in identifiers)
+    {
+        if([identifier isEqualToString:@""])
+        {
+            continue;
+        }
+
+        [self.library assetForURL:[NSURL URLWithString:identifier] resultBlock:^(ALAsset *asset) {
+            selected[identifier] = [[AssetLibraryPhotoAsset alloc] initWithAsset:asset];
+        } failureBlock:^(NSError *error){}];
+    }
+
+    return selected;
 }
 
 @end

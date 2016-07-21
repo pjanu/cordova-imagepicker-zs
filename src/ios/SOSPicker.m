@@ -43,24 +43,13 @@
 
     self.library = [[ALAssetsLibrary alloc] init];
 
+    AssetLibraryPhotoLibrary *library = [[AssetLibraryPhotoLibrary alloc] init:self.library];
+
     if (simpleHeader) {
         titleStyle = @"numberOnly";
     }
 
-    //TODO extract into a PhotoLibrary method
-    NSMutableDictionary *selectedImages = [[NSMutableDictionary alloc] init];
-    for (NSString *identifier in selected)
-    {
-        if([identifier isEqualToString:@""])
-        {
-            continue;
-        }
-
-        [self.library assetForURL:[NSURL URLWithString:identifier] resultBlock:^(ALAsset *asset) {
-            NSObject<PhotoAsset> *photoAsset = [[AssetLibraryPhotoAsset alloc] initWithAsset:asset];
-            selectedImages[identifier] = photoAsset;
-        } failureBlock:^(NSError *error){}];
-    }
+    NSMutableDictionary *selectedImages = [library getSelectedPhotos:selected];
 
     // Create the an album controller and image picker
     ELCAlbumPickerController *albumController = [[ELCAlbumPickerController alloc] init];
