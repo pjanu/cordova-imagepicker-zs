@@ -17,6 +17,8 @@
 #import "InterfaceOrientation.h"
 #import <CoreLocation/CoreLocation.h>
 #import "AssetLibraryPhotoLibrary.h"
+#import "PhotoAsset.h"
+#import "AssetLibraryPhotoAsset.h"
 
 #define CDV_PHOTO_PREFIX @"cdv_photo_"
 
@@ -45,14 +47,18 @@
         titleStyle = @"numberOnly";
     }
 
+    //TODO extract into a PhotoLibrary method
     NSMutableDictionary *selectedImages = [[NSMutableDictionary alloc] init];
-    for (NSString *identifier in selected) {
-        if ([identifier isEqualToString:@""]) {
+    for (NSString *identifier in selected)
+    {
+        if([identifier isEqualToString:@""])
+        {
             continue;
         }
 
         [self.library assetForURL:[NSURL URLWithString:identifier] resultBlock:^(ALAsset *asset) {
-            selectedImages[identifier] = asset;
+            NSObject<PhotoAsset> *photoAsset = [[AssetLibraryPhotoAsset alloc] initWithAsset:asset];
+            selectedImages[identifier] = photoAsset;
         } failureBlock:^(NSError *error){}];
     }
 

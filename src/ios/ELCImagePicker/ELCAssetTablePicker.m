@@ -166,8 +166,10 @@
 - (NSInteger)findAsset:(NSMutableArray *)selectedAssetsImages withIdentifier:(NSString *)identifier
 {
     NSInteger index = 0;
-    for (ALAsset *asset in selectedAssetsImages) {
-        if ([identifier isEqualToString:[[AssetIdentifier alloc] initWithAsset:asset].url]) {
+    for (NSObject<PhotoAsset> *asset in selectedAssetsImages)
+    {
+        if([identifier isEqualToString:[[asset getIdentifier] url]])
+        {
             break;
         }
         index++;
