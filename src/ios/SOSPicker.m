@@ -41,15 +41,13 @@
     self.height = [[options objectForKey:@"height"] integerValue];
     self.quality = [[options objectForKey:@"quality"] integerValue];
 
-    self.library = [[ALAssetsLibrary alloc] init];
-
-    AssetLibraryPhotoLibrary *library = [[AssetLibraryPhotoLibrary alloc] init:self.library];
+    self.library = [[AssetLibraryPhotoLibrary alloc] init:[[ALAssetsLibrary alloc] init]];
 
     if (simpleHeader) {
         titleStyle = @"numberOnly";
     }
 
-    NSMutableDictionary *selectedImages = [library getSelectedPhotos:selected];
+    NSMutableDictionary *selectedImages = [self.library getSelectedPhotos:selected];
 
     // Create the an album controller and image picker
     ELCAlbumPickerController *albumController = [[ELCAlbumPickerController alloc] init];
@@ -75,7 +73,7 @@
     imagePicker.overlayColor = [self colorFromNumber:selectedColor];
 
     albumController.selectedImages = selectedImages;
-    albumController.library = [[AssetLibraryPhotoLibrary alloc] init:self.library];
+    albumController.library = self.library;
     albumController.parent = imagePicker;
     self.callbackId = command.callbackId;
     // Present modally
