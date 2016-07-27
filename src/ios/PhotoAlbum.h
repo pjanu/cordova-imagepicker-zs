@@ -5,9 +5,11 @@
 
 @protocol PhotoAlbum <NSObject>
 
+typedef void (^ThumbnailFetch)(UIImage *);
+
 - (NSString *)getTitle;
 - (NSUInteger)getCount;
 - (NSMutableArray *)getPhotos;
-- (UIImage *)getThumbnail;
+- (void)fetchThumbnail:(ThumbnailFetch)onThumbnailFetch;
 
 @end

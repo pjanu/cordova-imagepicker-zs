@@ -61,14 +61,30 @@
 		<header-file src="src/ios/Spinner.h" />
 		<source-file src="src/ios/Spinner.m" />
 
+		<header-file src="src/ios/PhotoAsset.h" />
 		<header-file src="src/ios/PhotoAlbum.h" />
 		<header-file src="src/ios/PhotoLibrary.h" />
 
-		<source-file src="src/ios/ALAssetLibraryPhotoAlbum.h" />
+		<header-file src="src/ios/ALAssetLibraryPhotoAsset.h" />
+		<source-file src="src/ios/ALAssetLibraryPhotoAsset.m" />
+
+		<header-file src="src/ios/ALAssetLibraryPhotoAlbum.h" />
 		<source-file src="src/ios/ALAssetLibraryPhotoAlbum.m" />
 
-		<source-file src="src/ios/ALAssetLibraryPhotoLibrary.h" />
+		<header-file src="src/ios/ALAssetLibraryPhotoLibrary.h" />
 		<source-file src="src/ios/ALAssetLibraryPhotoLibrary.m" />
+
+		<header-file src="src/ios/PhotoKitPhotoAsset.h" />
+		<source-file src="src/ios/PhotoKitPhotoAsset.m" />
+
+		<header-file src="src/ios/PhotoKitPhotoAlbum.h" />
+		<source-file src="src/ios/PhotoKitPhotoAlbum.m" />
+
+		<header-file src="src/ios/PhotoKitPhotoLibrary.h" />
+		<source-file src="src/ios/PhotoKitPhotoLibrary.m" />
+
+		<header-file src="src/ios/ELCImagePicker/ELCAlbumCell.h" />
+		<source-file src="src/ios/ELCImagePicker/ELCAlbumCell.m" />
 
 		<header-file src="src/ios/ELCImagePicker/ELCAlbumPickerController.h" />
 		<source-file src="src/ios/ELCImagePicker/ELCAlbumPickerController.m" />

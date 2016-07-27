@@ -36,7 +36,7 @@
     return [UIImage imageWithCGImage:imgRef scale:1.0f orientation:orientation];
 }
 
-- (UIImage *)getThumbnail
+- (UIImage *)getThumbnail:(CGSize)size
 {
     return [UIImage imageWithCGImage:[self.asset thumbnail]];
 }

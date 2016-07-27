@@ -11,7 +11,7 @@
 - (AssetIdentifier *)getIdentifier;
 - (UIImage *)getImage;
 - (UIImage *)getImageWithOrientation:(UIImageOrientation)orientation;
-- (UIImage *)getThumbnail;
+- (UIImage *)getThumbnail:(CGSize)size;
 - (NSString *)getAssetType;
 - (CGSize)getOriginalSize;
 - (UIImageOrientation)getOrientation;

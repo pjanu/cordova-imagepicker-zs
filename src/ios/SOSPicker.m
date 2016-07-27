@@ -19,6 +19,7 @@
 #import "AssetLibraryPhotoLibrary.h"
 #import "PhotoAsset.h"
 #import "AssetLibraryPhotoAsset.h"
+#import "PhotoKitPhotoLibrary.h"
 
 #define CDV_PHOTO_PREFIX @"cdv_photo_"
 
@@ -41,7 +42,18 @@
     self.height = [[options objectForKey:@"height"] integerValue];
     self.quality = [[options objectForKey:@"quality"] integerValue];
 
-    self.library = [[AssetLibraryPhotoLibrary alloc] init:[[ALAssetsLibrary alloc] init]];
+    UIDevice *device = [[UIDevice alloc] init];
+    NSString *currentVersion = [device systemVersion];
+    NSString *photoKitVersion = @"8.0";
+
+    if([currentVersion compare:photoKitVersion options:NSNumericSearch] >= 0)
+    {
+        self.library = [[PhotoKitPhotoLibrary alloc] init];
+    }
+    else
+    {
+        self.library = [[AssetLibraryPhotoLibrary alloc] init:[[ALAssetsLibrary alloc] init]];
+    }
 
     if (simpleHeader) {
         titleStyle = @"numberOnly";

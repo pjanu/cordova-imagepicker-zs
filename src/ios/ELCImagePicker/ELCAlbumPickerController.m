@@ -8,9 +8,11 @@
 #import "ELCAlbumPickerController.h"
 #import "ELCImagePickerController.h"
 #import "ELCAssetTablePicker.h"
+#import "ELCAlbumCell.h"
 #import "LocalizedString.h"
 #import "AssetLibraryPhotoAlbum.h"
 #import "AssetLibraryPhotoLibrary.h"
+
 
 @implementation ELCAlbumPickerController
 
@@ -30,6 +32,8 @@
 
     UIBarButtonItem *backButton = [[UIBarButtonItem alloc] initWithTitle:[LocalizedString get:@"Back"] style:UIBarButtonItemStyleBordered target:nil action:nil];
     [self.navigationItem setBackBarButtonItem:backButton];
+
+    [self.tableView registerClass:[ELCAlbumCell class] forCellReuseIdentifier:@"UITableViewCell"];
 
     self.assetGroups = [self.library fetchAlbums:^{
         [self performSelectorOnMainThread:@selector(reloadTableView) withObject:nil waitUntilDone:YES];
@@ -76,13 +80,17 @@
 
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
-        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
+        cell = [[ELCAlbumCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
+        [cell setSeparatorInset:UIEdgeInsetsMake(0, 80, 0, 0)];
+        [(ELCAlbumCell*)cell setImageSize:CGSizeMake(48, 56) textPadding:80];
     }
 
     NSObject<PhotoAlbum> *album = (NSObject<PhotoAlbum>*)[self.assetGroups objectAtIndex:indexPath.row];
 
     cell.textLabel.text = [NSString stringWithFormat:@"%@ (%ld)",[album getTitle], (long) [album getCount]];
-    [cell.imageView setImage:[album getThumbnail]];
+    [album fetchThumbnail:^(UIImage *thumbnail){
+        [cell.imageView setImage:thumbnail];
+    }];
     [cell setAccessoryType:UITableViewCellAccessoryDisclosureIndicator];
 
     return cell;

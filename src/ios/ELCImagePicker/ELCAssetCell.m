@@ -43,6 +43,8 @@
 - (void)setAssets:(NSArray *)assets
 {
     int size = [self getCellSize];
+    CGSize cellSize = CGSizeMake(size, size);
+
     self.rowAssets = assets;
     for (UIImageView *view in _imageViewArray) {
         [view removeFromSuperview];
@@ -57,9 +59,11 @@
 
         if (i < [_imageViewArray count]) {
             UIImageView *imageView = [_imageViewArray objectAtIndex:i];
-            imageView.image = [elcAsset.asset getThumbnail];
+            imageView.image = [elcAsset.asset getThumbnail:cellSize];
         } else {
-            UIImageView *imageView = [[UIImageView alloc] initWithImage:[elcAsset.asset getThumbnail]];
+            UIImageView *imageView = [[UIImageView alloc] initWithImage:[elcAsset.asset getThumbnail:cellSize]];
+            imageView.contentMode = UIViewContentModeScaleAspectFill;
+            [imageView setClipsToBounds:YES];
             [_imageViewArray addObject:imageView];
         }
 
@@ -67,7 +71,7 @@
             UIView *overlayView = [_overlayViewArray objectAtIndex:i];
             overlayView.hidden = elcAsset.selected ? NO : YES;
         } else {
-            UIView *overlayView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, size, size)];
+            UIView *overlayView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, cellSize.width, cellSize.height)];
             UIColor *overlayColor = [[(id) elcAsset.parent overlayColor] colorWithAlphaComponent:0.75f];
             [overlayView setBackgroundColor:overlayColor];
             [_overlayViewArray addObject:overlayView];

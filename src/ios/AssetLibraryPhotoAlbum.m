@@ -54,9 +54,9 @@
     return [self.assetGroup valueForProperty:ALAssetsGroupPropertyName];
 }
 
-- (UIImage *)getThumbnail
+- (void)fetchThumbnail:(ThumbnailFetch)onThumbnailFetch
 {
-    return [UIImage imageWithCGImage:[self.assetGroup posterImage]];
+    onThumbnailFetch([UIImage imageWithCGImage:[self.assetGroup posterImage]]);
 }
 
 - (ALAssetsGroup *)getAssetGroup
