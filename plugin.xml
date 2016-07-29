@@ -65,14 +65,14 @@
 		<header-file src="src/ios/PhotoAlbum.h" />
 		<header-file src="src/ios/PhotoLibrary.h" />
 
-		<header-file src="src/ios/ALAssetLibraryPhotoAsset.h" />
-		<source-file src="src/ios/ALAssetLibraryPhotoAsset.m" />
+		<header-file src="src/ios/AssetLibraryPhotoAsset.h" />
+		<source-file src="src/ios/AssetLibraryPhotoAsset.m" />
 
-		<header-file src="src/ios/ALAssetLibraryPhotoAlbum.h" />
-		<source-file src="src/ios/ALAssetLibraryPhotoAlbum.m" />
+		<header-file src="src/ios/AssetLibraryPhotoAlbum.h" />
+		<source-file src="src/ios/AssetLibraryPhotoAlbum.m" />
 
-		<header-file src="src/ios/ALAssetLibraryPhotoLibrary.h" />
-		<source-file src="src/ios/ALAssetLibraryPhotoLibrary.m" />
+		<header-file src="src/ios/AssetLibraryPhotoLibrary.h" />
+		<source-file src="src/ios/AssetLibraryPhotoLibrary.m" />
 
 		<header-file src="src/ios/PhotoKitPhotoAsset.h" />
 		<source-file src="src/ios/PhotoKitPhotoAsset.m" />
