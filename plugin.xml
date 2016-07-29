@@ -28,6 +28,8 @@
 			</feature>
 		</config-file>
 
+        <framework src="Photos.framework" />
+
 		<header-file src="src/ios/SOSPicker.h" />
 		<source-file src="src/ios/SOSPicker.m" />
 
