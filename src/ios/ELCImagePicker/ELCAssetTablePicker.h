@@ -14,11 +14,12 @@
 #import "AssetPickerTitleStyle.h"
 #import "InterfaceOrientation.h"
 #import "Spinner.h"
+#import "PhotoAlbum.h"
 
 @interface ELCAssetTablePicker : UITableViewController <ELCAssetDelegate>
 
 @property (nonatomic, weak) id <ELCAssetSelectionDelegate> parent;
-@property (nonatomic, strong) ALAssetsGroup *assetGroup;
+@property (nonatomic, strong) NSObject<PhotoAlbum> *album;
 @property (nonatomic, strong) NSMutableArray *elcAssets;
 @property (nonatomic, strong) IBOutlet UILabel *selectedAssetsLabel;
 @property (nonatomic, assign) BOOL singleSelection;
@@ -33,6 +34,7 @@
 @property (nonatomic, assign) BOOL countOkEval;
 @property (nonatomic, strong) UIColor *overlayColor;
 @property (nonatomic, assign) int cellWidth;
+@property (nonatomic, assign) int columns;
 
 // optional, can be used to filter the assets displayed
 @property(nonatomic, weak) id<ELCAssetPickerFilterDelegate> assetPickerFilterDelegate;

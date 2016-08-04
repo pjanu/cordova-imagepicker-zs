@@ -25,53 +25,57 @@
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
     self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier];
-	if (self) {
+    if (self) {
         UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(cellTapped:)];
         [self addGestureRecognizer:tapRecognizer];
-        
+
         NSMutableArray *mutableArray = [[NSMutableArray alloc] initWithCapacity:4];
         self.imageViewArray = mutableArray;
-        
+
         NSMutableArray *overlayArray = [[NSMutableArray alloc] initWithCapacity:4];
         self.overlayViewArray = overlayArray;
 
         self.padding = 4;
-	}
-	return self;
+    }
+    return self;
 }
 
 - (void)setAssets:(NSArray *)assets
 {
     int size = [self getCellSize];
+    CGSize cellSize = CGSizeMake(size, size);
+
     self.rowAssets = assets;
-	for (UIImageView *view in _imageViewArray) {
+    for (UIImageView *view in _imageViewArray) {
         [view removeFromSuperview];
-	}
+    }
     for (UIImageView *view in _overlayViewArray) {
         [view removeFromSuperview];
-	}
+    }
 
     for (int i = 0; i < [_rowAssets count]; ++i) {
 
-        ELCAsset *asset = [_rowAssets objectAtIndex:i];
+        ELCAsset *elcAsset = [_rowAssets objectAtIndex:i];
 
         if (i < [_imageViewArray count]) {
             UIImageView *imageView = [_imageViewArray objectAtIndex:i];
-            imageView.image = [UIImage imageWithCGImage:asset.asset.thumbnail];
+            imageView.image = [elcAsset.asset getThumbnail:cellSize];
         } else {
-            UIImageView *imageView = [[UIImageView alloc] initWithImage:[UIImage imageWithCGImage:asset.asset.thumbnail]];
+            UIImageView *imageView = [[UIImageView alloc] initWithImage:[elcAsset.asset getThumbnail:cellSize]];
+            imageView.contentMode = UIViewContentModeScaleAspectFill;
+            [imageView setClipsToBounds:YES];
             [_imageViewArray addObject:imageView];
         }
-        
+
         if (i < [_overlayViewArray count]) {
             UIView *overlayView = [_overlayViewArray objectAtIndex:i];
-            overlayView.hidden = asset.selected ? NO : YES;
+            overlayView.hidden = elcAsset.selected ? NO : YES;
         } else {
-            UIView *overlayView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, size, size)];
-            UIColor *overlayColor = [[(id) asset.parent overlayColor] colorWithAlphaComponent:0.75f];
+            UIView *overlayView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, cellSize.width, cellSize.height)];
+            UIColor *overlayColor = [[(id) elcAsset.parent overlayColor] colorWithAlphaComponent:0.75f];
             [overlayView setBackgroundColor:overlayColor];
             [_overlayViewArray addObject:overlayView];
-            overlayView.hidden = asset.selected ? NO : YES;
+            overlayView.hidden = elcAsset.selected ? NO : YES;
         }
     }
 }
@@ -82,10 +86,10 @@
     CGPoint point = [tapRecognizer locationInView:self];
     CGFloat totalWidth = self.rowAssets.count * size + (self.rowAssets.count - 1) * self.padding;
     CGFloat startX = (self.bounds.size.width - totalWidth) / 2;
-    
-	CGRect frame = CGRectMake(startX, self.padding / 2, size, size);
-	
-	for (int i = 0; i < [_rowAssets count]; ++i) {
+
+    CGRect frame = CGRectMake(startX, self.padding / 2, size, size);
+
+    for (int i = 0; i < [_rowAssets count]; ++i) {
         if (CGRectContainsPoint(frame, point)) {
             ELCAsset *asset = [_rowAssets objectAtIndex:i];
             asset.selected = !asset.selected;
@@ -104,20 +108,20 @@
     int size = [self getCellSize];
     CGFloat totalWidth = self.rowAssets.count * size + (self.rowAssets.count - 1) * self.padding;
     CGFloat startX = (self.bounds.size.width - totalWidth) / 2;
-    
-	CGRect frame = CGRectMake(startX, self.padding / 2, size, size);
-	
-	for (int i = 0; i < [_rowAssets count]; ++i) {
-		UIImageView *imageView = [_imageViewArray objectAtIndex:i];
-		[imageView setFrame:frame];
-		[self addSubview:imageView];
-        
+
+    CGRect frame = CGRectMake(startX, self.padding / 2, size, size);
+
+    for (int i = 0; i < [_rowAssets count]; ++i) {
+        UIImageView *imageView = [_imageViewArray objectAtIndex:i];
+        [imageView setFrame:frame];
+        [self addSubview:imageView];
+
         UIImageView *overlayView = [_overlayViewArray objectAtIndex:i];
         [overlayView setFrame:frame];
         [self addSubview:overlayView];
-		
-		frame.origin.x = frame.origin.x + frame.size.width + self.padding;
-	}
+
+        frame.origin.x = frame.origin.x + frame.size.width + self.padding;
+    }
 }
 
 - (int)getCellSize {

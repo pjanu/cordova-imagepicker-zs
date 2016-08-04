@@ -16,6 +16,10 @@
 #import "AssetPickerTitleStyle.h"
 #import "InterfaceOrientation.h"
 #import <CoreLocation/CoreLocation.h>
+#import "AssetLibraryPhotoLibrary.h"
+#import "PhotoAsset.h"
+#import "AssetLibraryPhotoAsset.h"
+#import "PhotoKitPhotoLibrary.h"
 
 #define CDV_PHOTO_PREFIX @"cdv_photo_"
 
@@ -34,37 +38,39 @@
     NSString *orientation = [options objectForKey:@"orientation"];
     BOOL simpleHeader = [[options objectForKey:@"simpleHeader"] boolValue];
     BOOL countOkEval = [[options objectForKey:@"countOkEval"] boolValue];
-	self.width = [[options objectForKey:@"width"] integerValue];
-	self.height = [[options objectForKey:@"height"] integerValue];
-	self.quality = [[options objectForKey:@"quality"] integerValue];
+    self.width = [[options objectForKey:@"width"] integerValue];
+    self.height = [[options objectForKey:@"height"] integerValue];
+    self.quality = [[options objectForKey:@"quality"] integerValue];
 
-    self.library = [[ALAssetsLibrary alloc] init];
+    UIDevice *device = [[UIDevice alloc] init];
+    NSString *currentVersion = [device systemVersion];
+    NSString *photoKitVersion = @"8.0";
+
+    if([currentVersion compare:photoKitVersion options:NSNumericSearch] >= 0)
+    {
+        self.library = [[PhotoKitPhotoLibrary alloc] init];
+    }
+    else
+    {
+        self.library = [[AssetLibraryPhotoLibrary alloc] init:[[ALAssetsLibrary alloc] init]];
+    }
 
     if (simpleHeader) {
         titleStyle = @"numberOnly";
     }
 
-    NSMutableDictionary *selectedImages = [[NSMutableDictionary alloc] init];
-    for (NSString *identifier in selected) {
-        if ([identifier isEqualToString:@""]) {
-            continue;
-        }
+    NSMutableDictionary *selectedImages = [self.library getSelectedPhotos:selected];
 
-        [self.library assetForURL:[NSURL URLWithString:identifier] resultBlock:^(ALAsset *asset) {
-            selectedImages[identifier] = asset;
-        } failureBlock:^(NSError *error){}];
+    // Create the an album controller and image picker
+    ELCAlbumPickerController *albumController = [[ELCAlbumPickerController alloc] init];
+
+    if (maximumImagesCount == 1) {
+        albumController.immediateReturn = true;
+        albumController.singleSelection = true;
+    } else {
+        albumController.immediateReturn = false;
+        albumController.singleSelection = false;
     }
-
-	// Create the an album controller and image picker
-	ELCAlbumPickerController *albumController = [[ELCAlbumPickerController alloc] init];
-
-	if (maximumImagesCount == 1) {
-      albumController.immediateReturn = true;
-      albumController.singleSelection = true;
-   } else {
-      albumController.immediateReturn = false;
-      albumController.singleSelection = false;
-   }
 
     ELCImagePickerController *imagePicker = [[ELCImagePickerController alloc] initWithRootViewController:albumController];
     imagePicker.limitedOrientation = [InterfaceOrientation interfaceOrientationWithOrientation:orientation];
@@ -81,33 +87,32 @@
     albumController.selectedImages = selectedImages;
     albumController.library = self.library;
     albumController.parent = imagePicker;
-	self.callbackId = command.callbackId;
-	// Present modally
-	[self.viewController presentViewController:imagePicker
-	                       animated:YES
-	                     completion:nil];
+    self.callbackId = command.callbackId;
+    // Present modally
+    [self.viewController presentViewController:imagePicker
+                           animated:YES
+                         completion:nil];
 }
 
 
 - (void)elcImagePickerController:(ELCImagePickerController *)picker didFinishPickingMediaWithInfo:(NSArray *)info {
-	CDVPluginResult* result = nil;
+    CDVPluginResult* result = nil;
     NSMutableArray *addedFiles = [[NSMutableArray alloc] init];
     NSString* docsPath = [NSTemporaryDirectory()stringByStandardizingPath];
     NSFileManager* fileMgr = [[NSFileManager alloc] init];
     NSString* filePath;
-    ALAsset* asset = nil;
+    NSObject<PhotoAsset> *asset = nil;
     CGSize targetSize = CGSizeMake(self.width, self.height);
 
-    for (NSDictionary *dict in info) {
-        asset = [dict objectForKey:@"ALAsset"];
+    for(NSDictionary *dict in info)
+    {
+        asset = [dict objectForKey:@"PhotoAsset"];
         // From ELCImagePickerController.m
 
-        @autoreleasepool {
-
+        @autoreleasepool
+        {
             PhotoAttributes *attributes = [[PhotoAttributes alloc] init];
-
-            ALAssetRepresentation *assetRep = [asset defaultRepresentation];
-            CGSize originalSize = [assetRep dimensions];
+            CGSize originalSize = [asset getOriginalSize];
 
             NSDictionary *resizes = [NSDictionary dictionaryWithObjectsAndKeys:[PhotoResize resizeWithCGSize:originalSize], @"originalPhotoName",
                                             [PhotoResize resizeWithCGSize:targetSize], @"largePhotoName",
@@ -142,7 +147,7 @@
                 }
             }
 
-            attributes.originalFilePath = [[AssetIdentifier alloc] initWithAsset:asset].url;
+            attributes.originalFilePath = [asset getIdentifier].url;
             attributes.originalPhotoWidth = [NSNumber numberWithFloat:originalSize.width];
             attributes.originalPhotoHeight = [NSNumber numberWithFloat:originalSize.height];
 
@@ -155,21 +160,21 @@
             attributes.finalWidth = [NSNumber numberWithInteger:largeImage.size.width];
             attributes.finalHeight = [NSNumber numberWithInteger:largeImage.size.height];
 
-            attributes.exifDate = [[asset valueForProperty:ALAssetPropertyDate] description];
-            CLLocation *location = [asset valueForProperty:ALAssetPropertyLocation];
+            attributes.exifDate = [[asset getExifDate] description];
+            CLLocation *location = [asset getLocation];
             attributes.exifLatitude = [NSNumber numberWithDouble:location.coordinate.latitude];
             attributes.exifLongitude = [NSNumber numberWithDouble:location.coordinate.longitude];
 
             [addedFiles addObject:[attributes toJSONString]];
         }
-	}
+    }
 
     if (nil == result) {
         result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[self formatResult:addedFiles state:@"ok"]];
     }
 
-	[self.viewController dismissViewControllerAnimated:YES completion:nil];
-	[self.commandDelegate sendPluginResult:result callbackId:self.callbackId];
+    [self.viewController dismissViewControllerAnimated:YES completion:nil];
+    [self.commandDelegate sendPluginResult:result callbackId:self.callbackId];
 }
 
 - (NSDictionary *)formatResult:(NSMutableArray *)files state:(NSString *)resultState {
@@ -177,17 +182,18 @@
                          resultState, @"state", nil];
 }
 
-- (bool)isPortraitImage:(ALAsset *)asset {
-    UIImageOrientation orientation = [[asset valueForProperty:ALAssetPropertyOrientation] intValue];
+- (bool)isPortraitImage:(NSObject<PhotoAsset> *)asset
+{
+    UIImageOrientation orientation = [asset getOrientation];
     return orientation == UIImageOrientationLeft || orientation == UIImageOrientationRight || orientation == UIImageOrientationLeftMirrored || orientation == UIImageOrientationRight;
 }
 
 - (void)elcImagePickerControllerDidCancel:(ELCImagePickerController *)picker {
-	[self.viewController dismissViewControllerAnimated:YES completion:nil];
-	CDVPluginResult* pluginResult = nil;
+    [self.viewController dismissViewControllerAnimated:YES completion:nil];
+    CDVPluginResult* pluginResult = nil;
     NSMutableArray *emptyArray = [NSMutableArray array];
     pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[self formatResult:emptyArray state:@"cancelled"]];
-	[self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackId];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackId];
 }
 
 - (UIColor *)colorFromNumber:(NSInteger)color {
@@ -211,13 +217,11 @@
     return filePath;
 }
 
-- (UIImage *)resizeToFile:(ALAsset *)asset file:(NSString *)filePath toSize:(CGSize)targetSize {
-    @autoreleasepool {
-        UIImageOrientation orientation = UIImageOrientationUp;
-        ALAssetRepresentation *assetRep = [asset defaultRepresentation];
-        CGImageRef imgRef = [assetRep fullScreenImage];
-
-        UIImage *image = [UIImage imageWithCGImage:imgRef scale:1.0f orientation:orientation];
+- (UIImage *)resizeToFile:(NSObject<PhotoAsset> *)asset file:(NSString *)filePath toSize:(CGSize)targetSize
+{
+    @autoreleasepool
+    {
+        UIImage *image = [asset getImageWithOrientation:UIImageOrientationUp];
         image = [self imageByScalingNotCroppingForSize:image toSize:targetSize];
         NSData *data = UIImageJPEGRepresentation(image, self.quality/100.0f);
         NSError *err;
@@ -231,11 +235,9 @@
     }
 }
 
-- (UIImage *)originalToFile:(ALAsset *)asset file:(NSString *)filePath {
-    ALAssetRepresentation *assetRep = [asset defaultRepresentation];
-    CGImageRef imgRef = [assetRep fullResolutionImage];
-    UIImageOrientation orientation = (UIImageOrientation) [assetRep orientation];
-    UIImage *image = [UIImage imageWithCGImage:imgRef scale:1.0f orientation:orientation];
+- (UIImage *)originalToFile:(NSObject<PhotoAsset> *)asset file:(NSString *)filePath
+{
+    UIImage *image = [asset getImage];
     NSData *data = UIImageJPEGRepresentation(image, self.quality/100.0f);
     NSError *err;
     if (![data writeToFile:filePath options:NSAtomicWrite error:&err]) {

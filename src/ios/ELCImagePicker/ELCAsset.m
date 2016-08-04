@@ -12,14 +12,14 @@
 
 //Using auto synthesizers
 
-- (id)initWithAsset:(ALAsset*)asset
+- (id)initWithAsset:(NSObject<PhotoAsset> *)asset
 {
-	self = [super init];
-	if (self) {
-		self.asset = asset;
+    self = [super init];
+    if (self) {
+        self.asset = asset;
         _selected = NO;
     }
-	return self;	
+    return self;
 }
 
 - (void)toggleSelection

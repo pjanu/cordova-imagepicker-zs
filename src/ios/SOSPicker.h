@@ -9,6 +9,8 @@
 #import <Cordova/CDVPlugin.h>
 #import "ELCAlbumPickerController.h"
 #import "ELCImagePickerController.h"
+#import "PhotoLibrary.h"
+#import "PhotoAsset.h"
 
 @interface SOSPicker : CDVPlugin <ELCImagePickerControllerDelegate, UINavigationControllerDelegate, UIScrollViewDelegate>
 
@@ -16,15 +18,15 @@
 
 - (void) getPictures:(CDVInvokedUrlCommand *)command;
 - (UIImage*)imageByScalingNotCroppingForSize:(UIImage*)anImage toSize:(CGSize)frameSize;
-- (UIImage*)resizeToFile:(ALAsset *)asset file:(NSString *)filePath toSize:(CGSize)targetSize;
-- (UIImage *)originalToFile:(ALAsset *)asset file:(NSString *)filePath;
+- (UIImage *)resizeToFile:(NSObject<PhotoAsset> *)asset file:(NSString *)filePath toSize:(CGSize)targetSize;
+- (UIImage *)originalToFile:(NSObject<PhotoAsset> *)asset file:(NSString *)filePath;
 - (NSDictionary *)formatResult:(NSMutableArray *)files state:(NSString *)resultState;
-- (bool)isPortraitImage:(ALAsset *)asset;
+- (bool)isPortraitImage:(NSObject<PhotoAsset> *)asset;
 - (UIColor*)colorFromNumber:(NSInteger)color;
 
 @property (nonatomic, assign) NSInteger width;
 @property (nonatomic, assign) NSInteger height;
 @property (nonatomic, assign) NSInteger quality;
-@property (nonatomic, strong) ALAssetsLibrary *library;
+@property (nonatomic, strong) NSObject<PhotoLibrary> *library;
 
 @end

@@ -2,7 +2,7 @@
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
   xmlns:android="http://schemas.android.com/apk/res/android"
   id="cz.cognito.cordova-imagepicker-zs"
-  version="1.1.0">
+  version="1.1.1">
 
 	<name>ImagePicker Zetbook</name>
 
@@ -27,6 +27,8 @@
 				<param name="ios-package" value="SOSPicker"/>
 			</feature>
 		</config-file>
+
+        <framework src="Photos.framework" />
 
 		<header-file src="src/ios/SOSPicker.h" />
 		<source-file src="src/ios/SOSPicker.m" />
@@ -60,6 +62,31 @@
 
 		<header-file src="src/ios/Spinner.h" />
 		<source-file src="src/ios/Spinner.m" />
+
+		<header-file src="src/ios/PhotoAsset.h" />
+		<header-file src="src/ios/PhotoAlbum.h" />
+		<header-file src="src/ios/PhotoLibrary.h" />
+
+		<header-file src="src/ios/AssetLibraryPhotoAsset.h" />
+		<source-file src="src/ios/AssetLibraryPhotoAsset.m" />
+
+		<header-file src="src/ios/AssetLibraryPhotoAlbum.h" />
+		<source-file src="src/ios/AssetLibraryPhotoAlbum.m" />
+
+		<header-file src="src/ios/AssetLibraryPhotoLibrary.h" />
+		<source-file src="src/ios/AssetLibraryPhotoLibrary.m" />
+
+		<header-file src="src/ios/PhotoKitPhotoAsset.h" />
+		<source-file src="src/ios/PhotoKitPhotoAsset.m" />
+
+		<header-file src="src/ios/PhotoKitPhotoAlbum.h" />
+		<source-file src="src/ios/PhotoKitPhotoAlbum.m" />
+
+		<header-file src="src/ios/PhotoKitPhotoLibrary.h" />
+		<source-file src="src/ios/PhotoKitPhotoLibrary.m" />
+
+		<header-file src="src/ios/ELCImagePicker/ELCAlbumCell.h" />
+		<source-file src="src/ios/ELCImagePicker/ELCAlbumCell.m" />
 
 		<header-file src="src/ios/ELCImagePicker/ELCAlbumPickerController.h" />
 		<source-file src="src/ios/ELCImagePicker/ELCAlbumPickerController.m" />

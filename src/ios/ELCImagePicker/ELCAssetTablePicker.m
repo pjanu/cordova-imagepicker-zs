@@ -13,12 +13,6 @@
 #import "LocalizedString.h"
 #import <UIKit/UIKit.h>
 
-@interface ELCAssetTablePicker ()
-
-@property (nonatomic, assign) int columns;
-
-@end
-
 @implementation ELCAssetTablePicker
 
 //Using auto synthesizers
@@ -49,7 +43,7 @@
     self.elcAssets = tempArray;
 
     if (self.immediateReturn) {
-        
+
     } else {
         UIBarButtonItem *doneButtonItem = [[UIBarButtonItem alloc] initWithTitle:[LocalizedString get:@"Done"] style:UIBarButtonItemStyleDone target:self action:@selector(doneAction:)];
         [self.navigationItem setRightBarButtonItem:doneButtonItem];
@@ -58,7 +52,7 @@
         [self.navigationItem setTitleView:self.titleView];
     }
 
-	[self performSelectorInBackground:@selector(preparePhotos) withObject:nil];
+    [self performSelectorInBackground:@selector(preparePhotos) withObject:nil];
 }
 
 - (int) calculateCountOfColumns
@@ -110,44 +104,30 @@
 {
     @autoreleasepool {
 
-        [self.assetGroup enumerateAssetsUsingBlock:^(ALAsset *result, NSUInteger index, BOOL *stop) {
-            
-            if (result == nil) {
-                return;
-            }
-
-            ELCAsset *elcAsset = [[ELCAsset alloc] initWithAsset:result];
+        for (NSObject<PhotoAsset> *photoAsset in [self.album getPhotos])
+        {
+            ELCAsset *elcAsset = [[ELCAsset alloc] initWithAsset:photoAsset];
             [elcAsset setParent:self];
-            
-            BOOL isAssetFiltered = NO;
-            if (self.assetPickerFilterDelegate &&
-               [self.assetPickerFilterDelegate respondsToSelector:@selector(assetTablePicker:isAssetFilteredOut:)])
-            {
-                isAssetFiltered = [self.assetPickerFilterDelegate assetTablePicker:self isAssetFilteredOut:(ELCAsset*)elcAsset];
-            }
-
-            if (!isAssetFiltered) {
-                [self.elcAssets addObject:elcAsset];
-            }
-
-            NSString *identifier = [[AssetIdentifier alloc] initWithAsset:result].url;
+            NSString *identifier = [[photoAsset getIdentifier] url];
             BOOL isSelected = [[self.selectedImages allKeys] containsObject:identifier];
             [elcAsset setSelected:isSelected];
-         }];
+            [self.elcAssets addObject:elcAsset];
+        }
 
         dispatch_sync(dispatch_get_main_queue(), ^{
             [self.tableView reloadData];
             // scroll to bottom
             long section = [self numberOfSectionsInTableView:self.tableView] - 1;
             long row = [self tableView:self.tableView numberOfRowsInSection:section] - 1;
-            if (section >= 0 && row >= 0) {
+            if(section >= 0 && row >= 0)
+            {
                 NSIndexPath *ip = [NSIndexPath indexPathForRow:row
-                                                     inSection:section];
-                        [self.tableView scrollToRowAtIndexPath:ip
-                                              atScrollPosition:UITableViewScrollPositionBottom
-                                                      animated:NO];
+                                               inSection:section];
+                [self.tableView scrollToRowAtIndexPath:ip
+                                atScrollPosition:UITableViewScrollPositionBottom
+                                animated:NO];
             }
-            
+
             NSString *title = self.singleSelection ? [LocalizedString get:@"Pick Photo"] : [self getSelectedCountTitle];
             [self setTitle:title];
             [self updateTitleView];
@@ -186,8 +166,10 @@
 - (NSInteger)findAsset:(NSMutableArray *)selectedAssetsImages withIdentifier:(NSString *)identifier
 {
     NSInteger index = 0;
-    for (ALAsset *asset in selectedAssetsImages) {
-        if ([identifier isEqualToString:[[AssetIdentifier alloc] initWithAsset:asset].url]) {
+    for (NSObject<PhotoAsset> *asset in selectedAssetsImages)
+    {
+        if([identifier isEqualToString:[[asset getIdentifier] url]])
+        {
             break;
         }
         index++;
@@ -199,16 +181,18 @@
 {
     NSMutableArray *selectedAssetsImages = [[NSMutableArray alloc] initWithArray:[self.selectedImages allValues]];
 
-    for (ELCAsset *elcAsset in self.elcAssets) {
-        ALAsset *asset = [elcAsset asset];
-        NSString *identifier = [[AssetIdentifier alloc] initWithAsset:asset].url;
+    for(ELCAsset *elcAsset in self.elcAssets)
+    {
+        NSString *identifier = [[elcAsset.asset getIdentifier] url];
         BOOL isSelected = [elcAsset selected];
         BOOL alreadySelected = [[self.selectedImages allKeys] containsObject:identifier];
 
-        if (isSelected && !alreadySelected) {
-            [selectedAssetsImages addObject:asset];
+        if(isSelected && !alreadySelected)
+        {
+            [selectedAssetsImages addObject:elcAsset.asset];
         }
-        else if(!isSelected && alreadySelected) {
+        else if(!isSelected && alreadySelected)
+        {
             NSInteger index = [self findAsset:selectedAssetsImages withIdentifier:identifier];
             [selectedAssetsImages removeObjectAtIndex:index];
         }
@@ -221,8 +205,8 @@
 {
     NSMutableDictionary *selectedImages = [[NSMutableDictionary alloc] init];
 
-    for (ALAsset *asset in [self getSelectedImages]) {
-        NSString *identifier = [[[AssetIdentifier alloc] initWithAsset:asset] url];
+    for (NSObject<PhotoAsset> *asset in [self getSelectedImages]) {
+        NSString *identifier = [[asset getIdentifier] url];
         selectedImages[identifier] = asset;
     }
 
@@ -301,41 +285,41 @@
 
 // Customize the appearance of table view cells.
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
-{    
+{
     static NSString *CellIdentifier = @"Cell";
-        
+
     ELCAssetCell *cell = (ELCAssetCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
 
-    if (cell == nil) {		        
+    if (cell == nil) {
         cell = [[ELCAssetCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
         cell.width = self.cellWidth;
     }
-    
+
     [cell setAssets:[self assetsForIndexPath:indexPath]];
-    
+
     return cell;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-	return self.cellWidth;
+    return self.cellWidth;
 }
 
 - (int)totalSelectedAssets
 {
     NSArray *selected = [[self selectedImages] allKeys];
     int count = (int) [selected count];
-    
-    for (ELCAsset *asset in self.elcAssets) {
-        NSString *identifier = [[AssetIdentifier alloc] initWithAsset:[asset asset]].url;
-		if (!asset.selected && [selected containsObject:identifier]) {
+
+    for (ELCAsset *elcAsset in self.elcAssets) {
+        NSString *identifier = [[elcAsset.asset getIdentifier] url];
+        if (!elcAsset.selected && [selected containsObject:identifier]) {
             count--;
-		}
-        else if (asset.selected && ![selected containsObject:identifier]) {
+        }
+        else if (elcAsset.selected && ![selected containsObject:identifier]) {
             count++;
         }
-	}
-    
+    }
+
     return count;
 }
 

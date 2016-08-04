@@ -5,6 +5,7 @@
 //  Copyright 2011 ELC Technologies. All rights reserved.
 //
 
+#import "PhotoAsset.h"
 #import <UIKit/UIKit.h>
 #import <AssetsLibrary/AssetsLibrary.h>
 
@@ -20,10 +21,10 @@
 
 @interface ELCAsset : NSObject
 
-@property (nonatomic, strong) ALAsset *asset;
+@property (nonatomic, strong) NSObject<PhotoAsset> *asset;
 @property (nonatomic, weak) id<ELCAssetDelegate> parent;
 @property (nonatomic, assign) BOOL selected;
 
-- (id)initWithAsset:(ALAsset *)asset;
+- (id)initWithAsset:(NSObject<PhotoAsset> *)asset;
 
 @end

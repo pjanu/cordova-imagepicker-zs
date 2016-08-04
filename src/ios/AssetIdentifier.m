@@ -13,7 +13,7 @@
 
     if(self)
     {
-        NSURL *url = asset.defaultRepresentation.url;
+        NSURL *url = [asset valueForProperty:ALAssetPropertyAssetURL];
         NSURLComponents *query = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];
         self.identifier = [[URLQueryItems itemsWithQueryString:query.query] valueForParameter:@"id"];
         self.url = [url absoluteString];
