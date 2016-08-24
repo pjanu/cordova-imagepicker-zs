@@ -734,7 +734,6 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
 
                 while(i.hasNext()) {
 
-                    System.gc();
                     Bitmap bmp = null;
 
                     imageSequence++;
@@ -811,21 +810,28 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                     options.inSampleSize = inSampleSize; // 1
 
                     try {
-                        // create bitmap from file with bes sampling
+                        // create bitmap from file with best sampling
                         while((inSampleSize <= maxSampleSize) && bmp == null) {
+
+                            Log.d("ZETBOOK", "** try to get bitmap with sample size " + inSampleSize);
 
                             try {
                                 bmp = tryToGetBitmap(originalFile, options);
+
+                                Log.d("ZETBOOK", "** got bitmap with this sample size");
                             }
                             catch (OutOfMemoryError e) {
+
                                 // subsample
                                 inSampleSize *= 2;
+
+                                Log.d("ZETBOOK", "** failed getting bitmap with this sample size, changing sample size to " + inSampleSize);
 
                                 options = new BitmapFactory.Options();
                                 options.inSampleSize = inSampleSize;
 
+                                bmp.recycle();
                                 bmp = null;
-                                System.gc();
                             }
                         }
 
@@ -834,12 +840,17 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                             throw new OutOfMemoryError("** cannot create bitmap anyway (out of memmory)");
                         }
 
+
+                        Log.d("ZETBOOK", "** trying to scale bitmap");
+
                         // scale if needed
                         bmp = tryToScaleBitmapToPhoto(bmp);
 
                         // rotate if needed
 //                        bmp = tryToRotateBitmap(bmp, rotate);
 //                        rotationSuccess = true;
+
+                        Log.d("ZETBOOK", "** storing image");
 
                         // store file
                         tmpFile = storeImage(bmp, originalFileName);
@@ -853,16 +864,36 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                         // store as original file
                         tmpFile = storeImage(originalFile);
 
+                        // free graphic memory
                         // reset bmp
+                        bmp.recycle();
                         bmp = null;
                     }
+                    catch (Throwable t) {
+                        Log.d("ZETBOOK", "** out of memory (trying processing bitmap)");
+
+                        // store as original file
+                        tmpFile = storeImage(originalFile);
+
+                        // free graphic memory
+                        // reset bmp
+                        bmp.recycle();
+                        bmp = null;
+                    }
+
+
+                    Log.d("ZETBOOK", "** setting exif orientation");
 
                     // set same exif orientaton ans source
 //                    if(!rotationSuccess) {
                         tmpFile = setExifOrientation(tmpFile, orientation);
 //                    }
 
+
                     largePhotoName = Uri.fromFile(tmpFile).toString();
+
+                    Log.d("ZETBOOK", "** output file is " + largePhotoName);
+
 
 
 
@@ -911,7 +942,20 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                         // store as original file
                         tmpFile = storeImage(originalFile);
 
+                        // free graphic memory
                         // reset bmp
+                        bmp.recycle();
+                        bmp = null;
+                    }
+                    catch (Throwable t) {
+                        Log.d("ZETBOOK", "** out of memory");
+
+                        // store as original file
+                        tmpFile = storeImage(originalFile);
+
+                        // free graphic memory
+                        // reset bmp
+                        bmp.recycle();
                         bmp = null;
                     }
 
@@ -969,7 +1013,20 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                         // store as original file
                         tmpFile = storeImage(originalFile);
 
+                        // free graphic memory
                         // reset bmp
+                        bmp.recycle();
+                        bmp = null;
+                    }
+                    catch (Throwable t) {
+                        Log.d("ZETBOOK", "** out of memory");
+
+                        // store as original file
+                        tmpFile = storeImage(originalFile);
+
+                        // free graphic memory
+                        // reset bmp
+                        bmp.recycle();
                         bmp = null;
                     }
 
@@ -1025,11 +1082,7 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
 
                     al.add(jsonObj.toString());
 
-
-                    // old return string
-                    //al.add(largePhotoName + "|" + originalPhotoWidth + "x" + originalPhotoHeight + "-" + finalWidth + "x" + finalHeight + "-" + orientation + ";" + thumbnailName + ";" + miniPhotoName + ";" + originalFilePath);
-
-                    // free memory
+                    // free graphic memory
                     bmp.recycle();
                     bmp = null;
                 }
@@ -1180,9 +1233,14 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
         private Bitmap tryToScaleBitmap(Bitmap bmp, int newWidth, int newHeight) {
 
             Log.d("ZETBOOK", "** scaling bitmap to size " + newWidth + "x" + newHeight);
-            return Bitmap.createScaledBitmap(bmp, newWidth, newHeight, false);
-        }
+//            try {
+                bmp = Bitmap.createScaledBitmap(bmp, newWidth, newHeight, false);
+//            } catch (OutOfMemoryError e) {
 
+//                Log.d("ZETBOOK", "** FAILED ");
+                return bmp;
+//            }
+        }
 
 
         /*
