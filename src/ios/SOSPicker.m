@@ -98,7 +98,8 @@
 - (void)elcImagePickerController:(ELCImagePickerController *)picker didFinishPickingMediaWithInfo:(NSArray *)info {
     CDVPluginResult* result = nil;
     NSMutableArray *addedFiles = [[NSMutableArray alloc] init];
-    NSString* docsPath = [NSTemporaryDirectory()stringByStandardizingPath];
+    NSString *libraryDirectory = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+    NSString *dataDirectory = [libraryDirectory stringByAppendingPathComponent:@"NoCloud"];
     NSFileManager* fileMgr = [[NSFileManager alloc] init];
     NSString* filePath;
     NSObject<PhotoAsset> *asset = nil;
@@ -127,7 +128,7 @@
                 @try
                 {
                     PhotoResize *resize = [resizes objectForKey:key];
-                    filePath = [self getFilePath:fileMgr inDir:docsPath size:resize.size];
+                    filePath = [self getFilePath:fileMgr inDir:dataDirectory size:resize.size];
 
                     if(self.width == 0 && self.height == 0)
                     {
