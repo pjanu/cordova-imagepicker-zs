@@ -97,6 +97,9 @@
     NSString* filePath;
     ALAsset* asset = nil;
     CGSize targetSize = CGSizeMake(self.width, self.height);
+    
+    // prevent app from sleep, dont forge to turn it back on
+    [UIApplication sharedApplication].idleTimerDisabled = YES;
 
     for (NSDictionary *dict in info) {
         asset = [dict objectForKey:@"ALAsset"];
@@ -167,7 +170,7 @@
     if (nil == result) {
         result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[self formatResult:addedFiles state:@"ok"]];
     }
-
+    [UIApplication sharedApplication].idleTimerDisabled = NO;
 	[self.viewController dismissViewControllerAnimated:YES completion:nil];
 	[self.commandDelegate sendPluginResult:result callbackId:self.callbackId];
 }
