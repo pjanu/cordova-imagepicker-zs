@@ -105,6 +105,9 @@
     NSObject<PhotoAsset> *asset = nil;
     CGSize targetSize = CGSizeMake(self.width, self.height);
 
+    // prevent app from sleep, dont forge to turn it back on
+    [UIApplication sharedApplication].idleTimerDisabled = YES;
+
     for(NSDictionary *dict in info)
     {
         asset = [dict objectForKey:@"PhotoAsset"];
@@ -176,6 +179,7 @@
 
     [self.viewController dismissViewControllerAnimated:YES completion:nil];
     [self.commandDelegate sendPluginResult:result callbackId:self.callbackId];
+    [UIApplication sharedApplication].idleTimerDisabled = NO;
 }
 
 - (NSDictionary *)formatResult:(NSMutableArray *)files state:(NSString *)resultState {
