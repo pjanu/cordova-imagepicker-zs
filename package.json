@@ -1,6 +1,6 @@
 {
-  "name": "cordova-imagepicker-zs",
-  "version": "1.0.51",
+  "name": "imagepicker-zetbook-ver47",
+  "version": "1.0.52",
   "description": "This plugin allows selection of multiple images from the camera roll / gallery in a phonegap app",
   "main": "index.js",
   "scripts": {
