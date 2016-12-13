@@ -1,0 +1,19 @@
+{
+  "name": "cordova-imagepicker-zs",
+  "version": "1.0.50",
+  "description": "This plugin allows selection of multiple images from the camera roll / gallery in a phonegap app",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pjanu/cordova-imagepicker-zs.git"
+  },
+  "author": "cognito",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pjanu/cordova-imagepicker-zs/issues"
+  },
+  "homepage": "https://github.com/pjanu/cordova-imagepicker-zs#readme"
+}
