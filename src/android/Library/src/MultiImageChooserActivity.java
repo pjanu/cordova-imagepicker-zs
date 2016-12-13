@@ -68,6 +68,7 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Bitmap.Config;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.net.Uri;
@@ -809,6 +810,13 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                     options = new BitmapFactory.Options();
                     options.inSampleSize = inSampleSize; // 1
 
+                    // Image processing memory requirements optimization
+                    // skip ARGB_8888, and use RGB_565 instead, and then dither then images to preserve good quality
+                    // This was added 31.8.2016. It obviously lowers memory requirements by 30% but impact on image quality was not tested
+                    options.inJustDecodeBounds = false;
+                    options.inPreferredConfig = Config.RGB_565;
+                    options.inDither = true;
+
                     try {
                         // create bitmap from file with best sampling
                         while((inSampleSize <= maxSampleSize) && bmp == null) {
@@ -820,6 +828,7 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
 
                                 Log.d("ZETBOOK", "** got bitmap with this sample size");
                             }
+                            // We sometimes do not catch error here. App simply crashes without catch.
                             catch (OutOfMemoryError e) {
 
                                 // subsample
@@ -830,7 +839,24 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                                 options = new BitmapFactory.Options();
                                 options.inSampleSize = inSampleSize;
 
-                                bmp.recycle();
+                                if(bmp != null) {
+                                    bmp.recycle();
+                                }
+                                bmp = null;
+                            }
+                            catch (Throwable t) {
+
+                                // subsample
+                                inSampleSize *= 2;
+
+                                Log.d("ZETBOOK", "** failed getting bitmap with this sample size, changing sample size to " + inSampleSize);
+
+                                options = new BitmapFactory.Options();
+                                options.inSampleSize = inSampleSize;
+
+                                if(bmp != null) {
+                                    bmp.recycle();
+                                }
                                 bmp = null;
                             }
                         }
@@ -866,7 +892,9 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
 
                         // free graphic memory
                         // reset bmp
-                        bmp.recycle();
+                        if(bmp != null) {
+                            bmp.recycle();
+                        }
                         bmp = null;
                     }
                     catch (Throwable t) {
@@ -877,7 +905,9 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
 
                         // free graphic memory
                         // reset bmp
-                        bmp.recycle();
+                        if(bmp != null) {
+                            bmp.recycle();
+                        }
                         bmp = null;
                     }
 
@@ -944,7 +974,9 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
 
                         // free graphic memory
                         // reset bmp
-                        bmp.recycle();
+                        if(bmp != null) {
+                            bmp.recycle();
+                        }
                         bmp = null;
                     }
                     catch (Throwable t) {
@@ -955,7 +987,9 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
 
                         // free graphic memory
                         // reset bmp
-                        bmp.recycle();
+                        if(bmp != null) {
+                            bmp.recycle();
+                        }
                         bmp = null;
                     }
 
@@ -1015,7 +1049,9 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
 
                         // free graphic memory
                         // reset bmp
-                        bmp.recycle();
+                        if(bmp != null) {
+                            bmp.recycle();
+                        }
                         bmp = null;
                     }
                     catch (Throwable t) {
@@ -1026,7 +1062,9 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
 
                         // free graphic memory
                         // reset bmp
-                        bmp.recycle();
+                        if(bmp != null) {
+                            bmp.recycle();
+                        }
                         bmp = null;
                     }
 
@@ -1083,7 +1121,9 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                     al.add(jsonObj.toString());
 
                     // free graphic memory
-                    bmp.recycle();
+                    if(bmp != null) {
+                        bmp.recycle();
+                    }
                     bmp = null;
                 }
 
